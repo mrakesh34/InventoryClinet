@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useContext } from 'react';
 // Import Swiper React components
 import { Swiper, SwiperSlide } from 'swiper/react';
 
@@ -6,20 +6,20 @@ import { Swiper, SwiperSlide } from 'swiper/react';
 import 'swiper/css';
 import 'swiper/css/pagination';
 
-// import './styles.css';
-
 // import required modules
 import { Pagination } from 'swiper/modules';
 
-import img1 from '../../assets/banner-books/book1.png';
 // react icons
-import {FaCartShopping} from "react-icons/fa6"
+import { FaCartShopping } from "react-icons/fa6"
 import { Link } from 'react-router-dom';
+import { CartContext } from '../../contexts/CartProvider';
 
 const BookCards = ({headline, books}) => {
+    const { addToCart } = useContext(CartContext);
+
     return (
         <div className='my-16 px-4 lg:px-24'>
-            <h2 className='text-5xl my-5 font-bold text-center'>{headline}</h2>
+            <h2 className='text-5xl my-5 font-bold text-center text-blue-700'>{headline}</h2>
 
             {/* cards */}
             <div className='mt-20'>
@@ -48,30 +48,39 @@ const BookCards = ({headline, books}) => {
                 >
                     {
                         books.map(book => <SwiperSlide className='text-center flex items-center justify-center' key={book._id}>
-                            <Link to={`/book/${book._id}`} className='cursor-pointer'>
-                                <div className='bg-gray-100 p-8 rounded-lg relative'>
-                                    <img src={book.imageURL} alt="" className='w-full' />
-                                    <div className='absolute top-3 right-3 bg-blue-700 hover:bg-black p-2 rounded '>
-                                        <FaCartShopping className='w-4 h-4 text-white'/>
+                            <div className='relative w-full text-left'>
+                                <Link to={`/book/${book._id}`} className='cursor-pointer group flex flex-col h-[450px]'>
+                                    <div className='bg-gray-100 p-8 rounded-lg flex-1 flex justify-center items-center overflow-hidden'>
+                                        <img src={book.imageURL} alt={book.bookTitle} className='w-full h-full object-contain group-hover:scale-105 transition-transform duration-300' />
                                     </div>
-                                </div>
 
-                                <div className='mt-5 mb-8 text-left space-y-2 flex justify-between items-start'>
-                                    <div>
-                                        <h3 className='text-black font-semibold'>{book.bookTitle}</h3>
-                                        <p>{book.authorName}</p>
+                                    <div className='mt-5 mb-8 space-y-2 flex justify-between items-start'>
+                                        <div className='flex-1 pr-4'>
+                                            <h3 className='text-black font-semibold line-clamp-1'>{book.bookTitle}</h3>
+                                            <p className='text-sm text-gray-500 line-clamp-1'>{book.authorName}</p>
+                                        </div>
+                                        <div>
+                                            <p className='font-bold text-blue-700'>${book.price ? book.price.toFixed(2) : "10.00"}</p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <p className='font-bold text-blue-700'>$10.00</p>
-                                    </div>
-                                </div>
-                            </Link>
+                                </Link>
+
+                                {/* Floating Add to Cart Button (Separate from Link to avoid navigation) */}
+                                <button 
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        addToCart(book);
+                                    }}
+                                    className='absolute top-3 right-3 bg-blue-600 hover:bg-blue-800 p-3 rounded-full shadow-lg transition-all duration-300 hover:scale-110 z-10'
+                                    title="Add to Cart"
+                                >
+                                    <FaCartShopping className='w-5 h-5 text-white'/>
+                                </button>
+                            </div>
                         </SwiperSlide>)
                     }
-
                 </Swiper>
             </div>
-
         </div>
     )
 }

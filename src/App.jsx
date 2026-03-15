@@ -5,6 +5,7 @@ import { Outlet } from 'react-router-dom'
 import { AuthContext } from './contexts/AuthProvider'
 import Navbar from './pages/shared/Navbar'
 import FooterMain from './pages/shared/FooterMain'
+import CartDrawer from './components/CartDrawer'
 
 function App() {
 
@@ -12,6 +13,7 @@ function App() {
   return (
     <>
       <Navbar/>
+      <CartDrawer />
       <div className='min-h-screen'>
       <Outlet/>
       </div>
