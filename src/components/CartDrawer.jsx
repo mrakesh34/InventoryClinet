@@ -2,6 +2,7 @@ import React, { useContext } from "react";
 import { FaXmark, FaTrash, FaMinus, FaPlus } from "react-icons/fa6";
 import { CartContext } from "../contexts/CartProvider";
 import { Link } from "react-router-dom";
+import toast from 'react-hot-toast';
 
 const CartDrawer = () => {
     const { isCartOpen, setIsCartOpen, cartItems, updateQuantity, removeFromCart, getCartTotal } = useContext(CartContext);
@@ -55,7 +56,7 @@ const CartDrawer = () => {
                         </div>
                     ) : (
                         <div className="space-y-6">
-                            {cartItems.map((item) => (
+                            {cartItems.filter(item => item.book).map((item) => (
                                 <div key={item.book._id} className="flex gap-4 p-4 bg-white border border-gray-100 rounded-xl shadow-sm">
                                     <img 
                                         src={item.book.imageURL} 
@@ -84,8 +85,14 @@ const CartDrawer = () => {
                                                     </button>
                                                     <span className="text-sm font-medium w-6 text-center">{item.quantity}</span>
                                                     <button 
-                                                        onClick={() => updateQuantity(item.book._id, item.quantity + 1)}
-                                                        className="px-2 py-1 text-gray-500 hover:text-blue-600 transition-colors"
+                                                        onClick={() => updateQuantity(item.book._id, item.quantity + 1, item.book.stock)}
+                                                        className={`px-2 py-1 transition-colors ${
+                                                            item.quantity >= (item.book.stock ?? Infinity)
+                                                                ? 'text-gray-300 cursor-not-allowed'
+                                                                : 'text-gray-500 hover:text-blue-600'
+                                                        }`}
+                                                        disabled={item.quantity >= (item.book.stock ?? Infinity)}
+                                                        title={item.quantity >= (item.book.stock ?? Infinity) ? "Max stock reached" : "Increase quantity"}
                                                     >
                                                         <FaPlus className="w-3 h-3" />
                                                     </button>

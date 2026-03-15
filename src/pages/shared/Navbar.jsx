@@ -59,7 +59,9 @@ const Navbar = () => {
         return name.split(" ").map(n => n[0]).join("").toUpperCase().slice(0, 2);
     };
 
-    const totalCartItems = cartItems.reduce((total, item) => total + item.quantity, 0);
+    const totalCartItems = cartItems
+        .filter(item => item.book)
+        .reduce((total, item) => total + item.quantity, 0);
 
     return (
         <header className="w-full bg-transparent fixed top-0 left-0 right-0 transition-all ease-in duration-300" style={{ zIndex: 40 }}>

@@ -4,6 +4,7 @@ import { Elements, PaymentElement, useStripe, useElements } from '@stripe/react-
 import { AuthContext } from '../../contexts/AuthProvider';
 import { CartContext } from '../../contexts/CartProvider';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 // Initialize Stripe with the provided Test Public Key
 const stripePromise = loadStripe('pk_test_51TBDgpGYkY6jukzH7TAjxwVrk8tuNwiT5llzSErfASoomqxzOW2v1i64Ld5b5957JSgsp99s49Dd9TljfLEKKDbI009yqQbTV8');
@@ -50,12 +51,15 @@ const CheckoutForm = ({ clientSecret, addresses, refreshAddresses }) => {
                 setSelectedAddressId(data._id);
                 setIsAddingNewAddress(false);
                 setNewAddress({ name: '', street: '', city: '', state: '', zip: '', country: 'US', phone: '' });
+                toast.success("Address added successfully");
             } else {
                 setErrorMsg(data.error || 'Failed to add address');
+                toast.error(data.error || 'Failed to add address');
             }
         } catch (error) {
             console.error('Add address error:', error);
             setErrorMsg('Network error. Please try again.');
+            toast.error('Network error. Please try again.');
         }
     };
 
@@ -66,6 +70,7 @@ const CheckoutForm = ({ clientSecret, addresses, refreshAddresses }) => {
         
         if (!selectedAddressId) {
             setErrorMsg('Please select or add a shipping address');
+            toast.error('Please select or add a shipping address');
             return;
         }
 
@@ -83,6 +88,7 @@ const CheckoutForm = ({ clientSecret, addresses, refreshAddresses }) => {
 
         if (error) {
             setErrorMsg(error.message);
+            toast.error(error.message);
             setIsProcessing(false);
             return;
         }
@@ -107,18 +113,22 @@ const CheckoutForm = ({ clientSecret, addresses, refreshAddresses }) => {
                 if (orderRes.ok) {
                     // Success! 
                     // Cart clear logic is on Backend, so frontend needs to fetch empty cart or reload context
+                    toast.success('Payment successful! Order confirmed.');
                     navigate('/payment-success');
                     window.location.reload(); 
                 } else {
                     const data = await orderRes.json();
                     setErrorMsg(data.error || 'Failed to create order, but payment succeeded. Please contact support.');
+                    toast.error(data.error || 'Failed to create order.');
                 }
             } catch (err) {
                 console.error('Order creation error:', err);
                 setErrorMsg('Network error while creating order.');
+                toast.error('Network error while creating order.');
             }
         } else {
             setErrorMsg('Payment did not succeed. Status: ' + (paymentIntent?.status || 'Unknown'));
+            toast.error('Payment did not succeed.');
         }
 
         setIsProcessing(false);
@@ -211,7 +221,7 @@ const CheckoutForm = ({ clientSecret, addresses, refreshAddresses }) => {
             <div className="w-full lg:w-1/3 bg-gray-50 p-6 rounded-xl border border-gray-200 h-fit">
                 <h2 className="text-xl font-bold mb-4">Order Summary</h2>
                 <div className="space-y-4 mb-6">
-                    {cartItems.map((item) => (
+                    {cartItems.filter(item => item.book).map((item) => (
                         <div key={item.book._id} className="flex gap-3">
                             <img src={item.book.imageURL} alt={item.book.bookTitle} className="w-12 h-16 object-cover rounded" />
                             <div className="flex-1">
@@ -267,7 +277,8 @@ const Checkout = () => {
 
     useEffect(() => {
         const initializeCheckout = async () => {
-            if (cartItems.length === 0) {
+            const validItems = cartItems.filter(item => item.book);
+            if (validItems.length === 0) {
                 // If there's no item in cart when component mounts, redirect or just show empty state
                 setLoading(false);
                 return;
@@ -307,7 +318,8 @@ const Checkout = () => {
         return <div className="min-h-screen flex items-center justify-center">Loading Checkout...</div>;
     }
 
-    if (cartItems.length === 0) {
+    const validCartItems = cartItems.filter(item => item.book);
+    if (validCartItems.length === 0) {
         return (
             <div className="container mx-auto p-8 mt-20 text-center">
                 <h1 className="text-3xl font-bold mb-6">Your Cart is Empty</h1>

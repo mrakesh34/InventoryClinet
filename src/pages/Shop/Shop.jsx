@@ -40,11 +40,30 @@ export default function Shop() {
                 </p>
               </p>
 
+              <div className="flex justify-between items-center mt-2 mb-4">
+                <span className="text-xl font-bold text-blue-700">
+                  ${book.price ? book.price.toFixed(2) : "10.00"}
+                </span>
+                
+                {book.stock === 0 ? (
+                  <span className="text-xs font-bold px-2 py-1 rounded text-red-700 bg-red-100">Out of Stock</span>
+                ) : (book.stock > 0 && book.stock <= (book.lowStockThreshold ?? 5)) ? (
+                  <span className="text-xs font-bold px-2 py-1 rounded text-orange-700 bg-orange-100">Only {book.stock} left</span>
+                ) : (
+                  <span className="text-xs font-bold px-2 py-1 rounded text-green-700 bg-green-100">In Stock</span>
+                )}
+              </div>
+
               <button 
                 onClick={() => addToCart(book)}
-                className='mt-4 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md transition-all duration-200 active:scale-95'
+                disabled={book.stock === 0}
+                className={`w-full mt-4 px-4 py-2 text-white font-semibold rounded-lg shadow-md transition-all duration-200 ${
+                  book.stock === 0 
+                  ? 'bg-gray-400 cursor-not-allowed text-gray-200' 
+                  : 'bg-blue-600 hover:bg-blue-700 active:scale-95'
+                }`}
               >
-                Add to Cart
+                {book.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
               </button>
             </Card>)
           }

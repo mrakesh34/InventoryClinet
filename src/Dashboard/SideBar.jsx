@@ -1,124 +1,100 @@
-
 import { Sidebar } from 'flowbite-react';
-import { HiArrowSmRight, HiChartPie, HiInbox, HiShoppingBag, HiSupport, HiTable, HiUser, HiViewBoards, HiOutlineCloudUpload, HiHome } from 'react-icons/hi';
-import img from '../../src/assets/profile.jpg'
-import { Link } from 'react-router-dom';
+import {
+  HiChartPie,
+  HiBookOpen,
+  HiPlusCircle,
+  HiShoppingCart,
+  HiUsers,
+  HiLogout,
+  HiArchive,
+  HiClipboardList,
+  HiCollection,
+  HiCloudUpload,
+} from 'react-icons/hi';
+import img from '../../src/assets/profile.jpg';
 import { useContext } from 'react';
 import { AuthContext } from '../contexts/AuthProvider';
+import { useLocation, Link } from 'react-router-dom';
 import MobileDashboard from './MobileDashboard';
 
-const SideBar = () => {
-  const {user} = useContext(AuthContext)
-  return (
-    <div className=''>
-      <Sidebar aria-label="Sidebar with content separator example" className='hidden md:block'>
-        <Sidebar.Logo
-          href="/"
-          img={ img}
-          className='w-10 h-10 rounded-full'
-          imgAlt="Flowbite logo"
-        >
-          <p>
-            {user?.displayName || "Demo User" }
-          </p>
-        </Sidebar.Logo>
-        <Sidebar.Items>
-          <Sidebar.ItemGroup>
-            <Sidebar.Item
-              href="/"
-              icon={HiHome}>
-              <p>Home</p>
-            </Sidebar.Item>
-            <Sidebar.Item
-              href="/admin/dashboard"
-              icon={HiChartPie}>
-              <p>
-                Dashboard
-              </p>
-            </Sidebar.Item>
-            <Sidebar.Item
-              href="/admin/dashboard/upload"
-              icon={HiOutlineCloudUpload}
-            >
-              <p>
-                Upload Book
-              </p>
-            </Sidebar.Item>
+const menuItems = [
+  { to: '/admin/dashboard',              icon: HiChartPie,       label: 'Dashboard' },
+  { to: '/admin/dashboard/manage',       icon: HiBookOpen,       label: 'Books Inventory' },
+  { to: '/admin/dashboard/stock',        icon: HiArchive,        label: 'Stock Management' },
+  { to: '/admin/dashboard/add-stock',    icon: HiCollection,     label: 'Add Book Stock' },
+  { to: '/admin/dashboard/upload',       icon: HiCloudUpload,    label: 'Add New Book' },
+  { to: '/admin/dashboard/orders',       icon: HiShoppingCart,   label: 'Orders' },
+  { to: '/admin/dashboard/users',        icon: HiUsers,          label: 'Users & Purchases' },
+  { to: '/admin/dashboard/activity',     icon: HiClipboardList,  label: 'Stock Activity' },
+];
 
-            <Sidebar.Item
-              href="/admin/dashboard/manage"
-              icon={HiInbox}
-            >
-              <p>
-                ManageBooks
-              </p>
-            </Sidebar.Item>
-            <Sidebar.Item
-              href="#"
-              icon={HiUser}
-            >
-              <p>
-                Users
-              </p>
-            </Sidebar.Item>
-            <Sidebar.Item
-              href="#"
-              icon={HiShoppingBag}
-            >
-              <p>
-                Products
-              </p>
-            </Sidebar.Item>
-            <Sidebar.Item
-              href="/login"
-              icon={HiArrowSmRight}
-            >
-              <p>
-                Sign In
-              </p>
-            </Sidebar.Item>
-            <Sidebar.Item
-              href="/logout"
-              icon={HiTable}
-            >
-              <p>
-                Log out
-              </p>
-            </Sidebar.Item>
+const SideBar = () => {
+  const { user } = useContext(AuthContext);
+  const location = useLocation();
+
+  return (
+    <div>
+      {/* Desktop Sidebar */}
+      <Sidebar aria-label="Inventory Admin Sidebar" className="hidden md:block min-h-screen shadow-lg">
+        {/* Logo / Brand */}
+        <Sidebar.Logo
+          href="/admin/dashboard"
+          img={img}
+          className="w-10 h-10 rounded-full object-cover"
+          imgAlt="Admin"
+        >
+          <span className="text-sm font-semibold truncate max-w-[120px] block">
+            {user?.displayName || user?.email || 'Admin'}
+          </span>
+          <span className="text-xs text-gray-400 font-normal">Inventory Admin</span>
+        </Sidebar.Logo>
+
+        <Sidebar.Items>
+          {/* Main Nav */}
+          <Sidebar.ItemGroup>
+            {menuItems.map(({ to, icon, label }) => {
+              const isActive =
+                to === '/admin/dashboard'
+                  ? location.pathname === '/admin/dashboard'
+                  : location.pathname.startsWith(to);
+              return (
+                <Sidebar.Item
+                  key={to}
+                  as={Link}
+                  to={to}
+                  icon={icon}
+                  className={
+                    isActive
+                      ? 'bg-blue-50 text-blue-700 font-semibold border-r-4 border-blue-600 rounded-r-lg'
+                      : 'text-gray-600 hover:bg-gray-50'
+                  }
+                >
+                  {label}
+                </Sidebar.Item>
+              );
+            })}
           </Sidebar.ItemGroup>
+
+          {/* Logout */}
           <Sidebar.ItemGroup>
             <Sidebar.Item
-              href="#"
-              icon={HiChartPie}
+              as={Link}
+              to="/logout"
+              icon={HiLogout}
+              className="text-red-500 hover:bg-red-50 hover:text-red-700 cursor-pointer"
             >
-              <p>
-                Upgrade to Pro
-              </p>
-            </Sidebar.Item>
-            <Sidebar.Item
-              href="#"
-              icon={HiViewBoards}
-            >
-              <p>
-                Documentation
-              </p>
-            </Sidebar.Item>
-            <Sidebar.Item
-              href="#"
-              icon={HiSupport}
-            >
-              <p>
-                Help
-              </p>
+              Logout
             </Sidebar.Item>
           </Sidebar.ItemGroup>
         </Sidebar.Items>
       </Sidebar>
-      <div className='md:hidden'>
-          <MobileDashboard/>
+
+      {/* Mobile Nav */}
+      <div className="md:hidden">
+        <MobileDashboard />
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default SideBar
+export default SideBar;

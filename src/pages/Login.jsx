@@ -1,6 +1,7 @@
 import React, { useContext, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthProvider';
+import toast from 'react-hot-toast';
 
 export default function Login() {
 
@@ -24,13 +25,16 @@ export default function Login() {
 
         try {
             const data = await login(email, password);
+            toast.success('Login successful!');
             if (data.user.role === 'admin') {
                 navigate('/admin/dashboard', { replace: true });
             } else {
                 navigate(from, { replace: true });
             }
         } catch (error) {
-            setErrorMessage(error.message || 'Login failed. Please try again.');
+            const msg = error.message || 'Login failed. Please try again.';
+            setErrorMessage(msg);
+            toast.error(msg);
         } finally {
             setLoading(false);
         }

@@ -1,6 +1,7 @@
 import React, { useContext, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthProvider';
+import toast from 'react-hot-toast';
 
 const Signup = () => {
 
@@ -21,15 +22,19 @@ const Signup = () => {
 
         if (password.length < 6) {
             setErrorMessage('Password must be at least 6 characters.');
+            toast.error('Password must be at least 6 characters.');
             setLoading(false);
             return;
         }
 
         try {
             await createUser(email, password, name, 'user');
+            toast.success('Account created successfully!');
             navigate('/', { replace: true });
         } catch (error) {
-            setErrorMessage(error.message || 'Signup failed. Please try again.');
+            const msg = error.message || 'Signup failed. Please try again.';
+            setErrorMessage(msg);
+            toast.error(msg);
         } finally {
             setLoading(false);
         }

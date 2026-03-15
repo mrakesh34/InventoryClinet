@@ -1,4 +1,4 @@
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter } from "react-router-dom";
 import App from "../App";
 import { Home } from "../pages/Home/Home";
 import Shop from "../pages/Shop/Shop";
@@ -22,6 +22,10 @@ import PaymentSuccess from "../pages/Checkout/PaymentSuccess";
 import UserOrders from "../pages/Orders/UserOrders";
 import OrderDetails from "../pages/Orders/OrderDetails";
 import AdminOrders from "../Dashboard/AdminOrders";
+import AdminUsers from "../Dashboard/AdminUsers";
+import StockManagement from "../Dashboard/StockManagement";
+import AddBookStock from "../Dashboard/AddBookStock";
+import StockActivityPage from "../Dashboard/StockActivityPage";
 
 const router = createBrowserRouter([
   {
@@ -29,78 +33,45 @@ const router = createBrowserRouter([
     element: <App />,
     errorElement: <ErrorPage/>,
     children: [
-      {
-        path: "/",
-        element: <Home />
-      },
-      {
-        path: "/shop",
-        element: <Shop />,
-      },
+      { path: "/", element: <Home /> },
+      { path: "/shop", element: <Shop /> },
       {
         path: "/book/:id",
         element: <SignleBook />,
         loader: ({ params }) => fetch(`http://localhost:5000/api/books/${params.id}`)
       },
-      {
-        path: "/about",
-        element: <About/>
-      },
-      {
-        path: "/blog",
-        element: <Blog/>
-      },
-      {
-        path: "/profile",
-        element: <Profile/>
-      },
-      {
-        path: "/checkout",
-        element: <PrivateRoute><Checkout /></PrivateRoute>
-      },
-      {
-        path: "/orders",
-        element: <PrivateRoute><UserOrders /></PrivateRoute>
-      },
-      {
-        path: "/payment-success",
-        element: <PrivateRoute><PaymentSuccess /></PrivateRoute>
-      },
-      {
-        path: "/purchase/:id",
-        element: <PrivateRoute><OrderDetails /></PrivateRoute>
-      }
+      { path: "/about", element: <About/> },
+      { path: "/blog", element: <Blog/> },
+      { path: "/profile", element: <Profile/> },
+      { path: "/checkout", element: <PrivateRoute><Checkout /></PrivateRoute> },
+      { path: "/orders", element: <PrivateRoute><UserOrders /></PrivateRoute> },
+      { path: "/payment-success", element: <PrivateRoute><PaymentSuccess /></PrivateRoute> },
+      { path: "/purchase/:id", element: <PrivateRoute><OrderDetails /></PrivateRoute> },
     ]
   },
   {
     path: "/admin/dashboard",
     element: <DashboardLayout />,
     children: [
-      { path: "/admin/dashboard", element: <PrivateRoute><Dashboard></Dashboard></PrivateRoute>},
+      { path: "/admin/dashboard", element: <PrivateRoute><Dashboard /></PrivateRoute> },
       { path: "/admin/dashboard/upload", element: <UploadBook /> },
       { path: "/admin/dashboard/manage", element: <ManageBooks /> },
       { path: "/admin/dashboard/orders", element: <AdminOrders /> },
-      { path: "/admin/dashboard/edit-books/:id", element: <EditBooks />,
-      loader: ({ params }) => fetch(`http://localhost:5000/api/books/${params.id}`)
-    },
+      { path: "/admin/dashboard/users", element: <AdminUsers /> },
+      { path: "/admin/dashboard/stock", element: <StockManagement /> },
+      { path: "/admin/dashboard/add-stock", element: <AddBookStock /> },
+      { path: "/admin/dashboard/activity", element: <StockActivityPage /> },
+      {
+        path: "/admin/dashboard/edit-books/:id",
+        element: <EditBooks />,
+        loader: ({ params }) => fetch(`http://localhost:5000/api/books/${params.id}`)
+      },
     ],
   },
-  {
-    path: "login",
-    element: <Login />
-  },
-  {
-    path: "/create-user",
-    element: <Signup/>
-  },
-  {
-    path: "/admin/signup",
-    element: <AdminSignup/>
-  },
-  {
-    path:"/logout",
-    element: <Logout/>
-  }
+  { path: "login", element: <Login /> },
+  { path: "/create-user", element: <Signup/> },
+  { path: "/admin/signup", element: <AdminSignup/> },
+  { path: "/logout", element: <Logout/> },
 ]);
 
 export default router;

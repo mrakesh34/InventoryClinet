@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { AuthContext } from './AuthProvider';
+import toast from 'react-hot-toast';
 
 export const CartContext = createContext();
 
@@ -39,9 +40,20 @@ export const CartProvider = ({ children }) => {
     // Add to cart
     const addToCart = async (book) => {
         if (!user) {
-            alert('Please login to add items to the cart');
+            toast.error('Please login to add items to the cart');
             return;
         }
+
+        // Preemptive stock check if book data includes stock
+        if (book.stock !== undefined) {
+            const existingItem = cartItems.find(item => item.book && item.book._id === book._id);
+            const currentQty = existingItem ? existingItem.quantity : 0;
+            if (currentQty + 1 > book.stock) {
+                toast.error(`Cannot add more. Only ${book.stock} in stock.`);
+                return;
+            }
+        }
+
         try {
             setLoading(true);
             const token = localStorage.getItem('bookstore-token');
@@ -58,19 +70,27 @@ export const CartProvider = ({ children }) => {
                 const data = await res.json();
                 setCartItems(data.items);
                 setIsCartOpen(true); // Open drawer automatically
+                toast.success('Added to cart!');
             } else {
-                alert('Failed to add to cart');
+                const errData = await res.json();
+                toast.error(errData.error || 'Failed to add to cart');
             }
         } catch (error) {
             console.error("Error adding to cart:", error);
+            toast.error("Network error adding to cart");
         } finally {
             setLoading(false);
         }
     };
 
     // Update quantity
-    const updateQuantity = async (bookId, newQuantity) => {
+    const updateQuantity = async (bookId, newQuantity, maxStock = Infinity) => {
         if (!user || newQuantity < 1) return;
+
+        if (newQuantity > maxStock) {
+            toast.error(`Only ${maxStock} in stock.`);
+            return;
+        }
         
         try {
             const token = localStorage.getItem('bookstore-token');
@@ -85,9 +105,13 @@ export const CartProvider = ({ children }) => {
             if (res.ok) {
                 const data = await res.json();
                 setCartItems(data.items);
+            } else {
+                 const errData = await res.json();
+                 toast.error(errData.error || 'Failed to update quantity');
             }
         } catch (error) {
             console.error("Error updating cart:", error);
+            toast.error("Network error updating cart");
         }
     };
 
@@ -114,7 +138,9 @@ export const CartProvider = ({ children }) => {
     // Total price calculator
     const getCartTotal = () => {
         return cartItems.reduce((total, item) => {
-            return total + (item.book.price * item.quantity);
+            if (!item.book) return total;
+            const price = item.book.price || 10; // Fallback to 10 if price is undefined
+            return total + (price * item.quantity);
         }, 0);
     };
 

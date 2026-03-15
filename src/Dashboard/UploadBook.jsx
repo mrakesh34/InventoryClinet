@@ -1,8 +1,10 @@
 import React, { useState } from 'react'
 
-import { Button, Checkbox, Label, Select, TextInput, Textarea } from 'flowbite-react';
+import { Button, Label, Select, TextInput, Textarea, FileInput, Spinner } from 'flowbite-react';
+import toast from 'react-hot-toast';
 
 const UploadBook = () => {
+  const [isUploading, setIsUploading] = useState(false);
   const bookCategories = [
     "Fiction",
     "Non-fiction",
@@ -35,38 +37,83 @@ const UploadBook = () => {
     setSelectedBookCategory(event.target.value);
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
     const form = event.target;
 
     const bookTitle = form.bookTitle.value;
     const authorName = form.authorName.value;
-    const imageURL = form.imageURL.value;
     const category = form.categoryName.value;
+    const price = form.price.value;
     const bookDescription = form.bookDescription.value;
-    const bookPDFURL = form.bookPDFURL.value;
+    
+    const imageFile = form.imageFile.files[0];
+    const pdfFile = form.pdfFile.files[0];
 
-    const bookObj = {
-      bookTitle,
-      authorName,
-      imageURL,
-      category,
-      bookDescription,
-      bookPDFURL,
-    };
-    // console.log(dataObj)
-    fetch("http://localhost:5000/api/books", {
-      method: "POST",
-      headers: {
-        "Content-type": "application/json",
-      },
-      body: JSON.stringify(bookObj),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        alert("Book uploaded successfully!");
+    if (!imageFile || !pdfFile) {
+        toast.error("Please select both an image and a PDF file.");
+        return;
+    }
+
+    setIsUploading(true);
+
+    try {
+        // 1. Upload files to Cloudinary
+        const formData = new FormData();
+        formData.append('image', imageFile);
+        formData.append('pdf', pdfFile);
+
+        const token = localStorage.getItem('bookstore-token');
+        
+        const uploadRes = await fetch("http://localhost:5000/api/upload", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${token}`
+            },
+            body: formData
+        });
+
+        if (!uploadRes.ok) {
+            const err = await uploadRes.json();
+            throw new Error(err.error || "File upload failed");
+        }
+
+        const uploadedUrls = await uploadRes.json();
+
+        // 2. Save book to DB
+        const bookObj = {
+            bookTitle,
+            authorName,
+            imageURL: uploadedUrls.imageURL,
+            category,
+            price: Number(price),
+            bookDescription,
+            bookPDFURL: uploadedUrls.bookPDFURL,
+        };
+
+        const bookRes = await fetch("http://localhost:5000/api/books", {
+            method: "POST",
+            headers: {
+                "Content-type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify(bookObj),
+        });
+
+        if (!bookRes.ok) {
+            const err = await bookRes.json();
+            throw new Error(err.error || "Failed to save book");
+        }
+
+        toast.success("Book uploaded successfully!");
         form.reset();
-      });
+        setSelectedBookCategory(bookCategories[0]);
+    } catch (error) {
+        console.error(error);
+        toast.error(error.message || "An error occurred");
+    } finally {
+        setIsUploading(false);
+    }
   };
 
 
@@ -116,22 +163,20 @@ const UploadBook = () => {
 
         </div>
 
-        {/* 2nd Row */}
         <div className='flex gap-8'>
-          {/* book url */}
+          {/* book image upload */}
           <div className='lg:w-1/2'>
             <div className="mb-2 block">
               <Label
-                htmlFor="imageURL"
-                value="Book Image URL"
+                htmlFor="imageFile"
+                value="Upload Book Cover Image"
               />
             </div>
-            <TextInput
-              id="imageURL"
-              placeholder="Image URL"
+            <FileInput
+              id="imageFile"
+              name='imageFile'
+              accept="image/*"
               required
-              type="text"
-              name='imageURL'
               className='w-full'
             />
           </div>
@@ -181,28 +226,50 @@ const UploadBook = () => {
         </div>
 
 
-        {/* book pdf url */}
-        <div>
-          <div className="mb-2 block">
-            <Label
-              htmlFor="bookPDFURL"
-              value="Book PDF Link"
+        <div className='flex gap-8'>
+          {/* book price */}
+          <div className='lg:w-1/2'>
+            <div className="mb-2 block">
+              <Label htmlFor="price" value="Book Price ($)" />
+            </div>
+            <TextInput
+              id="price"
+              placeholder="10.00"
+              required
+              type="number"
+              step="0.01"
+              min="0"
+              name='price'
+              className='w-full'
             />
           </div>
-          <TextInput
-            id="bookPDFURL"
-            placeholder="Paste Book PDF URL here"
-            required
-            type="text"
-            name='bookPDFURL'
-            className='w-full'
-          />
+
+          {/* book pdf upload */}
+          <div className='lg:w-1/2'>
+            <div className="mb-2 block">
+              <Label
+                htmlFor="pdfFile"
+                value="Upload Book PDF"
+              />
+            </div>
+            <FileInput
+              id="pdfFile"
+              name='pdfFile'
+              accept="application/pdf"
+              required
+              className='w-full'
+            />
+          </div>
         </div>
 
 
         {/* Submit btn */}
-        <Button type="submit" className='mt-5'>
-          Upload book
+        <Button type="submit" className='mt-5' disabled={isUploading}>
+          {isUploading ? (
+            <><Spinner size="sm" className="mr-2" /> Uploading...</>
+          ) : (
+            'Upload book'
+          )}
         </Button>
 
       </form>

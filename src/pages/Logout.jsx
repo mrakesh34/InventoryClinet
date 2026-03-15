@@ -1,39 +1,38 @@
-import React, { useContext, useState } from 'react'
-import { Button, Modal } from 'flowbite-react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useContext, useEffect } from 'react'
+import { Spinner } from 'flowbite-react';
+import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthProvider';
 
 const Logout = () => {
-    const [openModal, setOpenModal] = useState("");
-    const props = { openModal, setOpenModal };
     const navigate = useNavigate();
-
     const { logOut } = useContext(AuthContext);
 
-    const handleSignOut = () => {
-        logOut();
-        navigate('/');
-    }
+    useEffect(() => {
+        const handleSignOut = async () => {
+            try {
+                // Clear any local storage tokens
+                localStorage.removeItem('bookstore-token');
+                
+                // Call context logout (e.g. Firebase signOut)
+                if (logOut) {
+                    await logOut();
+                }
+                
+                // Redirect to Home
+                navigate('/', { replace: true });
+            } catch (error) {
+                console.error("Logout error", error);
+                navigate('/', { replace: true });
+            }
+        };
+
+        handleSignOut();
+    }, [logOut, navigate]);
 
     return (
-        <div className='h-screen flex items-center justify-center'>
-            <Button onClick={() => props.setOpenModal('default')}>Click here to Logout</Button>
-            <Modal show={props.openModal === 'default'} onClose={() => props.setOpenModal(undefined)}>
-                <Modal.Header>Sign Out</Modal.Header>
-                <Modal.Body>
-                    <div className="space-y-6">
-                        <p className="text-base leading-relaxed text-gray-500 dark:text-gray-400">
-                            Are you sure you want to sign out? You will need to log in again to access the dashboard.
-                        </p>
-                    </div>
-                </Modal.Body>
-                <Modal.Footer>
-                    <Button onClick={handleSignOut}>Yes, Sign me out</Button>
-                    <Button color="gray" onClick={() => props.setOpenModal(undefined)}>
-                        Cancel
-                    </Button>
-                </Modal.Footer>
-            </Modal>
+        <div className='h-screen flex flex-col items-center justify-center bg-gray-50'>
+            <Spinner size="xl" />
+            <p className="mt-4 text-gray-600 font-medium">Logging you out...</p>
         </div>
     )
 }

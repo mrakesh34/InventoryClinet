@@ -137,7 +137,7 @@ const OrderDetails = () => {
                             <div className="space-y-4">
                                 {items.map((item, idx) => (
                                     <div key={idx} className="flex gap-4 p-4 rounded-xl border border-gray-100 hover:shadow-md transition-shadow bg-white">
-                                        <div className="w-16 h-24 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                                        <div className="w-16 h-24 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0 relative">
                                             {item.book?.imageURL ? (
                                                 <img src={item.book.imageURL} alt={item.title} className="w-full h-full object-cover" />
                                             ) : (
@@ -154,6 +154,21 @@ const OrderDetails = () => {
                                                 <span className="text-sm font-semibold text-gray-600 bg-gray-100 px-2 py-0.5 rounded">Qty: {item.quantity}</span>
                                                 <span className="font-bold text-gray-900">${(item.price * item.quantity).toFixed(2)}</span>
                                             </div>
+                                            
+                                            {/* Download PDF Button for Delivered Orders */}
+                                            {orderStatus === "Delivered" && item.book?.bookPDFURL && (
+                                                <div className="mt-4 border-t border-gray-100 pt-3">
+                                                    <a 
+                                                        href={item.book.bookPDFURL} 
+                                                        target="_blank" 
+                                                        rel="noopener noreferrer"
+                                                        className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 text-blue-700 hover:bg-blue-600 hover:text-white text-sm font-bold rounded-lg transition-colors"
+                                                    >
+                                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                                                        Download PDF
+                                                    </a>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 ))}

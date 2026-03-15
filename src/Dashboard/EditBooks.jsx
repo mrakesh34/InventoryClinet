@@ -1,11 +1,12 @@
 import React, { useState } from 'react'
-import { Button, Checkbox, Label, Select, TextInput, Textarea } from 'flowbite-react';
+import { Button, Label, Select, TextInput, Textarea, FileInput, Spinner } from 'flowbite-react';
 import { useLoaderData, useParams } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 const EditBooks = () => {
   const { id } = useParams();
-  const { bookTitle, authorName, imageURL, category, bookDescription, bookPDFURL } = useLoaderData();
-  // console.log(bookTitle)
+  const { bookTitle, authorName, imageURL, category, bookDescription, bookPDFURL, price } = useLoaderData();
+  const [isUploading, setIsUploading] = useState(false);
 
   const bookCategories = [
     "Fiction",
@@ -39,39 +40,81 @@ const EditBooks = () => {
   };
 
 
-  const  handleUpdate = (event) => {
+  const handleUpdate = async (event) => {
     event.preventDefault();
     const form = event.target;
 
-    const bookTitle = form.bookTitle.value;
-    const authorName = form.authorName.value;
-    const imageURL = form.imageURL.value;
-    const category = form.categoryName.value;
-    const bookDescription = form.bookDescription.value;
-    const bookPDFURL = form.bookPDFURL.value;
+    const updatedTitle = form.bookTitle.value;
+    const updatedAuthor = form.authorName.value;
+    const updatedCategory = form.categoryName.value;
+    const updatedPrice = form.price.value;
+    const updatedDesc = form.bookDescription.value;
+    
+    // Fallbacks if user didn't select new files
+    let finalImageURL = imageURL;
+    let finalPDFURL = bookPDFURL;
 
-    const bookObj = {
-      bookTitle,
-      authorName,
-      imageURL,
-      category,
-      bookDescription,
-      bookPDFURL,
-    };
-    // console.log(bookObj)
+    const imageFile = form.imageFile.files[0];
+    const pdfFile = form.pdfFile.files[0];
 
-    // update the book object
-    fetch(`http://localhost:5000/api/books/${id}`, {
-      method: "PATCH",
-      headers: {
-        "Content-type": "application/json",
-      },
-      body: JSON.stringify(bookObj),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        alert("Book updated successfully!");
-      });
+    setIsUploading(true);
+
+    try {
+        // 1. Upload new files if they exist
+        if (imageFile || pdfFile) {
+            const formData = new FormData();
+            if (imageFile) formData.append('image', imageFile);
+            if (pdfFile) formData.append('pdf', pdfFile);
+
+            const token = localStorage.getItem('bookstore-token');
+            const uploadRes = await fetch("http://localhost:5000/api/upload", {
+                method: "POST",
+                headers: { "Authorization": `Bearer ${token}` },
+                body: formData
+            });
+
+            if (!uploadRes.ok) {
+                const err = await uploadRes.json();
+                throw new Error(err.error || "File upload failed");
+            }
+
+            const uploadedUrls = await uploadRes.json();
+            if (uploadedUrls.imageURL) finalImageURL = uploadedUrls.imageURL;
+            if (uploadedUrls.bookPDFURL) finalPDFURL = uploadedUrls.bookPDFURL;
+        }
+
+        // 2. Update book in DB
+        const bookObj = {
+            bookTitle: updatedTitle,
+            authorName: updatedAuthor,
+            imageURL: finalImageURL,
+            category: updatedCategory,
+            price: Number(updatedPrice),
+            bookDescription: updatedDesc,
+            bookPDFURL: finalPDFURL,
+        };
+
+        const res = await fetch(`http://localhost:5000/api/books/${id}`, {
+            method: "PATCH",
+            headers: { 
+                "Content-type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify(bookObj),
+        });
+
+        if (!res.ok) {
+            const err = await res.json();
+            throw new Error(err.error || "Failed to update book");
+        }
+
+        toast.success("Book updated successfully!");
+    } catch (error) {
+        console.error(error);
+        toast.error(error.message || "An error occurred");
+    } finally {
+        setIsUploading(false);
+    }
   };
   
     return (
@@ -124,23 +167,21 @@ const EditBooks = () => {
 
           {/* 2nd Row */}
           <div className='flex gap-8'>
-            {/* book url */}
+            {/* book image upload (optional) */}
             <div className='lg:w-1/2'>
               <div className="mb-2 block">
                 <Label
-                  htmlFor="imageURL"
-                  value="Book Image URL"
+                  htmlFor="imageFile"
+                  value="Update Book Cover (Optional)"
                 />
               </div>
-              <TextInput
-                id="imageURL"
-                placeholder="Image URL"
-                required
-                type="text"
-                name='imageURL'
+              <FileInput
+                id="imageFile"
+                name='imageFile'
+                accept="image/*"
                 className='w-full'
-                defaultValue={imageURL}
               />
+              <p className="text-xs text-gray-500 mt-1">Leave empty to keep current image.</p>
             </div>
 
             {/* book category */}
@@ -189,29 +230,51 @@ const EditBooks = () => {
           </div>
 
 
-          {/* book pdf url */}
-          <div>
-            <div className="mb-2 block">
-              <Label
-                htmlFor="bookPDFURL"
-                value="Book PDF Link"
+          <div className='flex gap-8'>
+            {/* book price */}
+            <div className='lg:w-1/2'>
+              <div className="mb-2 block">
+                <Label htmlFor="price" value="Book Price ($)" />
+              </div>
+              <TextInput
+                id="price"
+                placeholder="10.00"
+                required
+                type="number"
+                step="0.01"
+                min="0"
+                name='price'
+                className='w-full'
+                defaultValue={price}
               />
             </div>
-            <TextInput
-              id="bookPDFURL"
-              placeholder="Paste Book PDF URL here"
-              required
-              type="text"
-              name='bookPDFURL'
-              className='w-full'
-              defaultValue={bookPDFURL}
-            />
+
+            {/* book pdf url (optional upload) */}
+            <div className='lg:w-1/2'>
+              <div className="mb-2 block">
+                <Label
+                  htmlFor="pdfFile"
+                  value="Update Book PDF (Optional)"
+                />
+              </div>
+              <FileInput
+                  id="pdfFile"
+                  name="pdfFile"
+                  accept="application/pdf"
+                  className="w-full"
+              />
+              <p className="text-xs text-gray-500 mt-1">Leave empty to keep current PDF.</p>
+            </div>
           </div>
 
 
           {/* Submit btn */}
-          <Button type="submit" className='mt-5'>
-            Upload book
+          <Button type="submit" className='mt-5' disabled={isUploading}>
+            {isUploading ? (
+              <><Spinner size="sm" className="mr-2" /> Updating...</>
+            ) : (
+              'Update book'
+            )}
           </Button>
 
         </form>

@@ -6,7 +6,7 @@ import { MdShoppingCart } from 'react-icons/md';
 const SignleBook = () => {
     const data = useLoaderData();
     const navigate = useNavigate();
-    const { _id, bookTitle, authorName, imageURL, category, bookDescription, price } = data;
+    const { _id, bookTitle, authorName, imageURL, category, bookDescription, price, stock, lowStockThreshold } = data;
     const { addToCart } = useContext(CartContext);
 
     return (
@@ -39,9 +39,25 @@ const SignleBook = () => {
                         By <span className='text-gray-800'>{authorName}</span>
                     </p>
                     
-                    <p className='text-gray-600 text-lg leading-relaxed mb-8'>
+                    <p className='text-gray-600 text-lg leading-relaxed mb-6'>
                         {bookDescription || "A fascinating book that you will definitely enjoy reading. It explores various themes and keeps you hooked from start to finish."}
                     </p>
+
+                    <div className="mb-8">
+                        {stock === 0 ? (
+                            <span className="inline-flex items-center px-3 py-1 bg-red-100 text-red-700 text-sm font-bold rounded-lg">
+                                ❌ Out of Stock
+                            </span>
+                        ) : stock <= (lowStockThreshold ?? 5) ? (
+                            <span className="inline-flex items-center px-3 py-1 bg-orange-100 text-orange-700 text-sm font-bold rounded-lg">
+                                ⚠️ Only {stock} units left in stock!
+                            </span>
+                        ) : (
+                            <span className="inline-flex items-center px-3 py-1 bg-green-100 text-green-700 text-sm font-bold rounded-lg">
+                                ✅ In Stock ({stock} available)
+                            </span>
+                        )}
+                    </div>
 
                     <div className='flex flex-col sm:flex-row sm:items-center gap-6 mt-auto border-t border-gray-100 pt-8'>
                         <div className='text-4xl font-black text-blue-700'>
@@ -50,10 +66,15 @@ const SignleBook = () => {
                         
                         <button 
                             onClick={() => addToCart(data)}
-                            className='flex-1 sm:flex-none flex items-center justify-center gap-3 px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white text-lg font-bold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 active:scale-95'
+                            disabled={stock === 0}
+                            className={`flex-1 sm:flex-none flex items-center justify-center gap-3 px-8 py-4 text-white text-lg font-bold rounded-xl shadow-lg transition-all duration-300 ${
+                                stock === 0 
+                                    ? 'bg-gray-400 cursor-not-allowed' 
+                                    : 'bg-blue-600 hover:bg-blue-700 hover:shadow-xl active:scale-95'
+                            }`}
                         >
                             <MdShoppingCart className='w-6 h-6' />
-                            Add to Cart
+                            {stock === 0 ? 'Out of Stock' : 'Add to Cart'}
                         </button>
                     </div>
                 </div>
