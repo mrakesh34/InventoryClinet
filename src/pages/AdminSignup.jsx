@@ -2,7 +2,7 @@ import React, { useContext, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthProvider';
 
-const Signup = () => {
+const AdminSignup = () => {
 
     const [errorMessage, setErrorMessage] = useState('');
     const [loading, setLoading] = useState(false);
@@ -26,8 +26,8 @@ const Signup = () => {
         }
 
         try {
-            await createUser(email, password, name, 'user');
-            navigate('/', { replace: true });
+            await createUser(email, password, name, 'admin');
+            navigate('/admin/dashboard', { replace: true });
         } catch (error) {
             setErrorMessage(error.message || 'Signup failed. Please try again.');
         } finally {
@@ -38,12 +38,12 @@ const Signup = () => {
     return (
         <div className="min-h-screen bg-gray-100 py-6 flex flex-col justify-center sm:py-12">
             <div className="relative py-3 sm:max-w-xl sm:mx-auto">
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-300 to-blue-600 shadow-lg transform -skew-y-6 sm:skew-y-0 sm:-rotate-6 sm:rounded-3xl"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-purple-300 to-purple-600 shadow-lg transform -skew-y-6 sm:skew-y-0 sm:-rotate-6 sm:rounded-3xl"></div>
                 <div className="relative px-4 py-10 bg-white shadow-lg sm:rounded-3xl sm:p-20">
                     <div className="max-w-md mx-auto">
                         <div>
-                            <h1 className="text-3xl font-semibold">Create an Account</h1>
-                            <p className="mt-1 text-sm text-gray-500">Sign up to buy books</p>
+                            <h1 className="text-3xl font-semibold">Create Admin Account</h1>
+                            <p className="mt-1 text-sm text-gray-500">Sign up to manage the book inventory</p>
                         </div>
                         <div className="divide-y divide-gray-200">
                             <form onSubmit={handleSignup} className="py-8 text-base leading-6 space-y-4 text-gray-700 sm:text-lg sm:leading-7">
@@ -53,8 +53,8 @@ const Signup = () => {
                                         id="name"
                                         name="name"
                                         type="text"
-                                        className="peer h-10 w-full border-b-2 border-gray-300 text-gray-900 focus:outline-none focus:border-blue-500"
-                                        placeholder="John Doe"
+                                        className="peer h-10 w-full border-b-2 border-gray-300 text-gray-900 focus:outline-none focus:border-purple-500"
+                                        placeholder="Admin Name"
                                         required
                                     />
                                 </div>
@@ -64,8 +64,8 @@ const Signup = () => {
                                         id="email"
                                         name="email"
                                         type="email"
-                                        className="peer h-10 w-full border-b-2 border-gray-300 text-gray-900 focus:outline-none focus:border-blue-500"
-                                        placeholder="you@example.com"
+                                        className="peer h-10 w-full border-b-2 border-gray-300 text-gray-900 focus:outline-none focus:border-purple-500"
+                                        placeholder="admin@example.com"
                                         required
                                     />
                                 </div>
@@ -75,7 +75,7 @@ const Signup = () => {
                                         id="password"
                                         name="password"
                                         type="password"
-                                        className="peer h-10 w-full border-b-2 border-gray-300 text-gray-900 focus:outline-none focus:border-blue-500"
+                                        className="peer h-10 w-full border-b-2 border-gray-300 text-gray-900 focus:outline-none focus:border-purple-500"
                                         placeholder="Min. 6 characters"
                                         required
                                     />
@@ -88,17 +88,17 @@ const Signup = () => {
                                 )}
 
                                 <p className="text-sm text-gray-600">
-                                    Already have an account?{' '}
-                                    <Link to='/login' className="underline text-blue-600 font-medium">Login here</Link>
+                                    Already have an admin account?{' '}
+                                    <Link to='/login' className="underline text-purple-600 font-medium">Login here</Link>
                                 </p>
 
                                 <div className="relative">
                                     <button
                                         type='submit'
                                         disabled={loading}
-                                        className="w-full bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300 text-white rounded-lg px-6 py-2 font-medium transition-colors"
+                                        className="w-full bg-purple-500 hover:bg-purple-600 disabled:bg-purple-300 text-white rounded-lg px-6 py-2 font-medium transition-colors"
                                     >
-                                        {loading ? 'Creating account...' : 'Sign Up'}
+                                        {loading ? 'Creating account...' : 'Sign Up as Admin'}
                                     </button>
                                 </div>
                             </form>
@@ -110,4 +110,4 @@ const Signup = () => {
     )
 }
 
-export default Signup
+export default AdminSignup

@@ -1,13 +1,14 @@
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect } from "react";
 import { AuthContext } from "../contexts/AuthProvider";
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import {
   FaUser, FaEnvelope, FaShoppingBag, FaBoxOpen, FaShoppingCart
 } from "react-icons/fa";
 
 const Profile = () => {
   const { user, loading } = useContext(AuthContext);
-  const [activeTab, setActiveTab] = useState("profile");
+  const location = useLocation();
+  const [activeTab, setActiveTab] = useState(location.state?.activeTab || "profile");
 
   if (loading) {
     return (
@@ -115,38 +116,128 @@ const InfoCard = ({ icon, label, value }) => (
 );
 
 /* ───── My Purchases Tab ───── */
-const MyPurchasesTab = () => (
-  <div className="space-y-6">
-    <h2 className="text-xl font-bold text-gray-800">My Purchases</h2>
+const MyPurchasesTab = () => {
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-    {/* Under Construction Card */}
-    <div className="bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-2xl p-8 flex flex-col items-center text-center gap-4 shadow-sm">
-      <div className="w-20 h-20 bg-amber-100 rounded-full flex items-center justify-center">
-        <FaBoxOpen className="w-10 h-10 text-amber-500" />
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const token = localStorage.getItem("bookstore-token");
+        if (!token) {
+          setLoading(false);
+          return;
+        }
+
+        const res = await fetch("http://localhost:5000/api/orders/my-orders", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          setOrders(data);
+        } else {
+          setError("Failed to fetch orders.");
+        }
+      } catch (err) {
+        console.error(err);
+        setError("Network error fetching orders.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrders();
+  }, []);
+
+  if (loading) {
+    return <div className="text-center py-8">Loading purchases...</div>;
+  }
+
+  if (error) {
+    return <div className="text-center py-8 text-red-500">{error}</div>;
+  }
+
+  if (orders.length === 0) {
+    return (
+      <div className="bg-gradient-to-br from-gray-50 to-gray-100 border border-gray-200 rounded-2xl p-8 flex flex-col items-center text-center gap-4 shadow-sm">
+        <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center">
+          <FaBoxOpen className="w-10 h-10 text-gray-500" />
+        </div>
+        <div>
+          <h3 className="text-lg font-bold text-gray-700 mb-1">No purchases found</h3>
+          <p className="text-gray-500 text-sm max-w-sm">
+            Looks like you haven't bought any books yet.
+          </p>
+        </div>
+        <button
+          onClick={() => (window.location.href = "/shop")}
+          className="mt-2 flex items-center gap-2 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg"
+        >
+          <FaShoppingCart className="w-4 h-4" />
+          Browse Books
+        </button>
       </div>
+    );
+  }
 
-      {/* Under Construction Badge */}
-      <div className="inline-flex items-center gap-2 bg-amber-200 text-amber-800 text-xs font-bold px-4 py-1.5 rounded-full uppercase tracking-widest">
-        <span>🚧</span> Under Construction
+  return (
+    <div className="space-y-6">
+      <h2 className="text-xl font-bold text-gray-800">My Purchases</h2>
+      
+      <div className="space-y-6">
+        {orders.map((order) => (
+          <div key={order._id} onClick={() => window.location.href = `/purchase/${order._id}`} className="bg-white border text-left border-gray-100 rounded-xl shadow-sm overflow-hidden cursor-pointer hover:shadow-md transition-shadow hover:border-blue-200">
+            {/* Order Header */}
+            <div className="bg-gray-50 flex flex-wrap justify-between items-center p-4 border-b border-gray-100">
+              <div>
+                <p className="text-xs text-gray-500 uppercase font-semibold">Order Placed</p>
+                <p className="text-sm text-gray-800">{new Date(order.createdAt).toLocaleDateString()}</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 uppercase font-semibold">Total</p>
+                <p className="text-sm font-bold text-gray-800">${order.totalAmount.toFixed(2)}</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 uppercase font-semibold">Order #</p>
+                <p className="text-sm text-gray-800 font-mono">{order._id.substring(order._id.length - 8)}</p>
+              </div>
+              <div>
+                <p className="text-xs text-gray-500 uppercase font-semibold text-right">Status</p>
+                <span className={`inline-block px-3 py-1 mt-1 text-xs font-semibold rounded-full ${order.orderStatus === "Delivered" ? "bg-green-100 text-green-700" : order.orderStatus === "Shipped" ? "bg-blue-100 text-blue-700" : order.orderStatus === "Cancelled" ? "bg-red-100 text-red-700" : order.orderStatus === "Processing" ? "bg-yellow-100 text-yellow-700" : "bg-gray-100 text-gray-700"}`}>
+                  {order.orderStatus}
+                </span>
+              </div>
+            </div>
+
+            {/* Order Body */}
+            <div className="p-4 md:flex gap-6">
+              <div className="flex-1 space-y-4">
+                <h4 className="font-semibold text-gray-800 mb-2 border-b pb-2">Items</h4>
+                {order.items.map((item, idx) => (
+                  <div key={idx} className="flex gap-4 items-center border-b border-gray-50 pb-2">
+                    {item.book?.imageURL ? (
+                      <img src={item.book.imageURL} alt={item.title} className="w-10 h-14 object-cover rounded" />
+                    ) : (
+                      <div className="w-10 h-14 bg-gray-100 rounded flex items-center justify-center text-xs text-gray-400">No Img</div>
+                    )}
+                    <div className="flex-1">
+                      <p className="font-medium text-sm text-gray-800 line-clamp-1">{item.title}</p>
+                      <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
+                    </div>
+                    <p className="font-semibold text-sm text-gray-800">${(item.price * item.quantity).toFixed(2)}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        ))}
       </div>
-
-      <div>
-        <h3 className="text-lg font-bold text-gray-700 mb-1">Purchase History Coming Soon</h3>
-        <p className="text-gray-500 text-sm max-w-sm">
-          We're working hard to bring you your complete order history. Check back soon!
-        </p>
-      </div>
-
-      {/* Add to Cart Button */}
-      <button
-        onClick={() => window.location.href = "/shop"}
-        className="mt-2 flex items-center gap-2 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-200 shadow-md hover:shadow-lg"
-      >
-        <FaShoppingCart className="w-4 h-4" />
-        Add to Cart
-      </button>
     </div>
-  </div>
-);
+  );
+};
 
 export default Profile;

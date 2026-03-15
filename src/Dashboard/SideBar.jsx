@@ -1,6 +1,6 @@
 
 import { Sidebar } from 'flowbite-react';
-import { HiArrowSmRight, HiChartPie, HiInbox, HiShoppingBag, HiSupport, HiTable, HiUser, HiViewBoards, HiOutlineCloudUpload } from 'react-icons/hi';
+import { HiArrowSmRight, HiChartPie, HiInbox, HiShoppingBag, HiSupport, HiTable, HiUser, HiViewBoards, HiOutlineCloudUpload, HiHome } from 'react-icons/hi';
 import img from '../../src/assets/profile.jpg'
 import { Link } from 'react-router-dom';
 import { useContext } from 'react';
@@ -24,6 +24,11 @@ const SideBar = () => {
         </Sidebar.Logo>
         <Sidebar.Items>
           <Sidebar.ItemGroup>
+            <Sidebar.Item
+              href="/"
+              icon={HiHome}>
+              <p>Home</p>
+            </Sidebar.Item>
             <Sidebar.Item
               href="/admin/dashboard"
               icon={HiChartPie}>

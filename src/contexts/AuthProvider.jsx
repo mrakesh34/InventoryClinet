@@ -24,13 +24,13 @@ const AuthProvider = ({ children }) => {
         setLoading(false);
     }, []);
 
-    // Signup with email, password, name
-    const createUser = async (email, password, name) => {
+    // Signup with email, password, name, role
+    const createUser = async (email, password, name, role = 'user') => {
         setLoading(true);
         const res = await fetch(`${API_BASE}/auth/signup`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password, name })
+            body: JSON.stringify({ email, password, name, role })
         });
         const data = await res.json();
         if (!res.ok) {

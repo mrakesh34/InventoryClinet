@@ -116,7 +116,10 @@ const CartDrawer = () => {
                         </div>
                         <p className="text-xs text-gray-400 mb-4">Taxes and shipping calculated at checkout</p>
                         
-                        <button className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-md transition-all active:scale-[0.98] flex justify-center items-center gap-2">
+                        <button 
+                            onClick={() => { setIsCartOpen(false); window.location.href = "/checkout"; }}
+                            className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-md transition-all active:scale-[0.98] flex justify-center items-center gap-2"
+                        >
                             Checkout
                         </button>
                         

@@ -42,13 +42,16 @@ const Navbar = () => {
         navigate("/");
     };
 
-    const navItems = [
+    const baseNavItems = [
         { link: "Home", path: "/" },
         { link: "About", path: "/about" },
         { link: "Shop", path: "/shop" },
-        { link: "Sell Your Book", path: "/admin/dashboard" },
         { link: "Blog", path: "/blog" },
     ];
+
+    const navItems = user?.role === 'admin'
+        ? [...baseNavItems, { link: "Admin Dashboard", path: "/admin/dashboard" }]
+        : baseNavItems;
 
     // Get initials for avatar
     const getInitials = (name) => {

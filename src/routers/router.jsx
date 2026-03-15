@@ -11,11 +11,17 @@ import Dashboard from "../Dashboard/Dashboard";
 import ManageBooks from "../Dashboard/ManageBooks";
 import EditBooks from "../Dashboard/EditBooks";
 import Signup from "../pages/Signup";
+import AdminSignup from "../pages/AdminSignup";
 import Logout from "../pages/Logout";
 import ErrorPage from "../pages/shared/ErrorPage";
 import About from "../pages/about/About";
 import Blog from "../pages/blog/Blog";
 import Profile from "../pages/Profile";
+import Checkout from "../pages/Checkout/Checkout";
+import PaymentSuccess from "../pages/Checkout/PaymentSuccess";
+import UserOrders from "../pages/Orders/UserOrders";
+import OrderDetails from "../pages/Orders/OrderDetails";
+import AdminOrders from "../Dashboard/AdminOrders";
 
 const router = createBrowserRouter([
   {
@@ -47,6 +53,22 @@ const router = createBrowserRouter([
       {
         path: "/profile",
         element: <Profile/>
+      },
+      {
+        path: "/checkout",
+        element: <PrivateRoute><Checkout /></PrivateRoute>
+      },
+      {
+        path: "/orders",
+        element: <PrivateRoute><UserOrders /></PrivateRoute>
+      },
+      {
+        path: "/payment-success",
+        element: <PrivateRoute><PaymentSuccess /></PrivateRoute>
+      },
+      {
+        path: "/purchase/:id",
+        element: <PrivateRoute><OrderDetails /></PrivateRoute>
       }
     ]
   },
@@ -57,6 +79,7 @@ const router = createBrowserRouter([
       { path: "/admin/dashboard", element: <PrivateRoute><Dashboard></Dashboard></PrivateRoute>},
       { path: "/admin/dashboard/upload", element: <UploadBook /> },
       { path: "/admin/dashboard/manage", element: <ManageBooks /> },
+      { path: "/admin/dashboard/orders", element: <AdminOrders /> },
       { path: "/admin/dashboard/edit-books/:id", element: <EditBooks />,
       loader: ({ params }) => fetch(`http://localhost:5000/api/books/${params.id}`)
     },
@@ -69,6 +92,10 @@ const router = createBrowserRouter([
   {
     path: "/create-user",
     element: <Signup/>
+  },
+  {
+    path: "/admin/signup",
+    element: <AdminSignup/>
   },
   {
     path:"/logout",

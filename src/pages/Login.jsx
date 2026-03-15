@@ -23,8 +23,12 @@ export default function Login() {
         const password = form.password.value;
 
         try {
-            await login(email, password);
-            navigate(from, { replace: true });
+            const data = await login(email, password);
+            if (data.user.role === 'admin') {
+                navigate('/admin/dashboard', { replace: true });
+            } else {
+                navigate(from, { replace: true });
+            }
         } catch (error) {
             setErrorMessage(error.message || 'Login failed. Please try again.');
         } finally {
