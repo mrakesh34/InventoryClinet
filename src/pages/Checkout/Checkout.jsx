@@ -8,7 +8,9 @@ import toast from 'react-hot-toast';
 import API_BASE from '../../utils/api';
 
 // Initialize Stripe with the provided Test Public Key
-const stripePromise = loadStripe('pk_test_51TBDgpGYkY6jukzH7TAjxwVrk8tuNwiT5llzSErfASoomqxzOW2v1i64Ld5b5957JSgsp99s49Dd9TljfLEKKDbI009yqQbTV8');
+// const stripePromise = loadStripe('pk_test_51TBDgpGYkY6jukzH7TAjxwVrk8tuNwiT5llzSErfASoomqxzOW2v1i64Ld5b5957JSgsp99s49Dd9TljfLEKKDbI009yqQbTV8');
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+
 
 const CheckoutForm = ({ clientSecret, addresses, refreshAddresses }) => {
     const stripe = useStripe();
