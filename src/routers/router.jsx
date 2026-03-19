@@ -1,4 +1,5 @@
 import { createBrowserRouter } from "react-router-dom";
+import API_BASE from '../utils/api';
 import App from "../App";
 import { Home } from "../pages/Home/Home";
 import Shop from "../pages/Shop/Shop";
@@ -38,7 +39,7 @@ const router = createBrowserRouter([
       {
         path: "/book/:id",
         element: <SignleBook />,
-        loader: ({ params }) => fetch(`http://localhost:5000/api/books/${params.id}`)
+        loader: ({ params }) => fetch(`${API_BASE}/books/${params.id}`)
       },
       { path: "/about", element: <About/> },
       { path: "/blog", element: <Blog/> },
@@ -64,7 +65,7 @@ const router = createBrowserRouter([
       {
         path: "/admin/dashboard/edit-books/:id",
         element: <EditBooks />,
-        loader: ({ params }) => fetch(`http://localhost:5000/api/books/${params.id}`)
+        loader: ({ params }) => fetch(`${API_BASE}/books/${params.id}`)
       },
     ],
   },

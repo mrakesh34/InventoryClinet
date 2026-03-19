@@ -6,6 +6,7 @@ import {
   HiClock,
   HiTrendingUp,
 } from 'react-icons/hi';
+import API_BASE from '../utils/api';
 
 const StatCard = ({ icon: Icon, label, value, color, bg }) => (
   <div className={`flex items-center gap-4 p-5 rounded-2xl shadow-sm border ${bg}`}>
@@ -43,8 +44,8 @@ const Dashboard = () => {
     const fetchData = async () => {
       try {
         const [booksRes, ordersRes] = await Promise.all([
-          fetch('http://localhost:5000/api/books'),
-          fetch('http://localhost:5000/api/orders/all-orders', {
+          fetch(`${API_BASE}/books`),
+          fetch(`${API_BASE}/orders/all-orders`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
         ]);

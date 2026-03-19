@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { AuthContext } from './AuthProvider';
 import toast from 'react-hot-toast';
+import API_BASE from '../utils/api';
 
 export const CartContext = createContext();
 
@@ -18,7 +19,7 @@ export const CartProvider = ({ children }) => {
         }
         try {
             const token = localStorage.getItem('bookstore-token');
-            const res = await fetch('http://localhost:5000/api/cart', {
+            const res = await fetch(`${API_BASE}/cart`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 }
@@ -57,7 +58,7 @@ export const CartProvider = ({ children }) => {
         try {
             setLoading(true);
             const token = localStorage.getItem('bookstore-token');
-            const res = await fetch('http://localhost:5000/api/cart', {
+            const res = await fetch(`${API_BASE}/cart`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -94,7 +95,7 @@ export const CartProvider = ({ children }) => {
         
         try {
             const token = localStorage.getItem('bookstore-token');
-            const res = await fetch(`http://localhost:5000/api/cart/${bookId}`, {
+            const res = await fetch(`${API_BASE}/cart/${bookId}`, {
                 method: 'PATCH',
                 headers: {
                     'Content-Type': 'application/json',
@@ -120,7 +121,7 @@ export const CartProvider = ({ children }) => {
          if (!user) return;
          try {
              const token = localStorage.getItem('bookstore-token');
-             const res = await fetch(`http://localhost:5000/api/cart/${bookId}`, {
+             const res = await fetch(`${API_BASE}/cart/${bookId}`, {
                  method: 'DELETE',
                  headers: {
                      'Authorization': `Bearer ${token}`

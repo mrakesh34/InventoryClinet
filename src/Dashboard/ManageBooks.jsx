@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Pagination } from 'flowbite-react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import API_BASE from '../utils/api';
 
 const ManageBooks = () => {
     const [allBooks, setAllBooks] = useState([]);
@@ -10,7 +11,7 @@ const ManageBooks = () => {
     const ITEMS_PER_PAGE = 10;
 
     useEffect(() => {
-        fetch(`http://localhost:5000/api/books`)
+        fetch(`${API_BASE}/books`)
             .then((res) => res.json())
             .then((data) => {
                 setAllBooks(data);
@@ -22,7 +23,7 @@ const ManageBooks = () => {
     const handleDelete = (id, title) => {
         const token = localStorage.getItem('bookstore-token');
         const toastId = toast.loading(`Deleting "${title}"...`);
-        fetch(`http://localhost:5000/api/books/${id}`, {
+        fetch(`${API_BASE}/books/${id}`, {
             method: 'DELETE',
             headers: { Authorization: `Bearer ${token}` },
         })

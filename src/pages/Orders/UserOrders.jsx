@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../../contexts/AuthProvider';
+import API_BASE from '../../utils/api';
 
 const UserOrders = () => {
     const { user } = useContext(AuthContext);
@@ -16,7 +17,7 @@ const UserOrders = () => {
                     return;
                 }
                 
-                const res = await fetch('http://localhost:5000/api/orders/my-orders', {
+                const res = await fetch(`${API_BASE}/orders/my-orders`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
                     }

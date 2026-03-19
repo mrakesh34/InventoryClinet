@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { HiTrendingUp, HiTrendingDown, HiRefresh, HiFilter } from 'react-icons/hi';
+import API_BASE from '../utils/api';
 
 const typeConfig = {
   stock_in: {
@@ -35,7 +36,7 @@ const StockActivityPage = () => {
       const token = localStorage.getItem('bookstore-token');
       const typeParam = f !== 'all' ? `&type=${f}` : '';
       const res = await fetch(
-        `http://localhost:5000/api/stock-activity?page=${p}&limit=${LIMIT}${typeParam}`,
+        `${API_BASE}/stock-activity?page=${p}&limit=${LIMIT}${typeParam}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       if (!res.ok) throw new Error('Failed to fetch activity');

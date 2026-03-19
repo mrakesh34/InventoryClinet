@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { HiSearch, HiEye } from 'react-icons/hi';
+import API_BASE from '../utils/api';
 
 const statusColors = {
   Pending:    'bg-yellow-100 text-yellow-800',
@@ -28,10 +29,10 @@ const AdminUsers = () => {
     const fetchAll = async () => {
       try {
         const [usersRes, ordersRes] = await Promise.all([
-          fetch('http://localhost:5000/api/users', {
+          fetch(`${API_BASE}/users`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
-          fetch('http://localhost:5000/api/orders/all-orders', {
+          fetch(`${API_BASE}/orders/all-orders`, {
             headers: { Authorization: `Bearer ${token}` },
           }),
         ]);
@@ -66,7 +67,7 @@ const AdminUsers = () => {
   const handleStatusChange = async (orderId, newStatus) => {
     try {
       const token = localStorage.getItem('bookstore-token');
-      const res = await fetch(`http://localhost:5000/api/orders/${orderId}/status`, {
+      const res = await fetch(`${API_BASE}/orders/${orderId}/status`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

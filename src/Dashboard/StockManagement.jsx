@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { HiSearch, HiPlusCircle, HiMinusSm, HiExclamation, HiCheckCircle } from 'react-icons/hi';
+import API_BASE from '../utils/api';
 
 const LOW_STOCK_DEFAULT = 5;
 
@@ -37,7 +38,7 @@ const StockManagement = () => {
   useEffect(() => {
     const fetchBooks = async () => {
       try {
-        const res = await fetch('http://localhost:5000/api/books');
+        const res = await fetch(`${API_BASE}/books`);
         const data = await res.json();
         setBooks(data);
         // Init form state
@@ -81,7 +82,7 @@ const StockManagement = () => {
 
     setUpdating(book._id);
     try {
-      const res = await fetch(`http://localhost:5000/api/books/${book._id}/stock`, {
+      const res = await fetch(`${API_BASE}/books/${book._id}/stock`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

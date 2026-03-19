@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
-
 import { Button, Label, Select, TextInput, Textarea, FileInput, Spinner } from 'flowbite-react';
 import toast from 'react-hot-toast';
+import API_BASE from '../utils/api';
 
 const UploadBook = () => {
   const [isUploading, setIsUploading] = useState(false);
@@ -65,7 +65,7 @@ const UploadBook = () => {
 
         const token = localStorage.getItem('bookstore-token');
         
-        const uploadRes = await fetch("http://localhost:5000/api/upload", {
+        const uploadRes = await fetch(`${API_BASE}/upload`, {
             method: "POST",
             headers: {
                 "Authorization": `Bearer ${token}`
@@ -91,7 +91,7 @@ const UploadBook = () => {
             bookPDFURL: uploadedUrls.bookPDFURL,
         };
 
-        const bookRes = await fetch("http://localhost:5000/api/books", {
+        const bookRes = await fetch(`${API_BASE}/books`, {
             method: "POST",
             headers: {
                 "Content-type": "application/json",

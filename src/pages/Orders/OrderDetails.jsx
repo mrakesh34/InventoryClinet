@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FaArrowLeft, FaBox, FaMapMarkerAlt, FaCreditCard, FaCheckCircle } from 'react-icons/fa';
+import API_BASE from '../../utils/api';
 
 const OrderDetails = () => {
     const { id } = useParams();
@@ -13,7 +14,7 @@ const OrderDetails = () => {
         const fetchOrderDetails = async () => {
             try {
                 const token = localStorage.getItem('bookstore-token');
-                const res = await fetch(`http://localhost:5000/api/orders/${id}`, {
+                const res = await fetch(`${API_BASE}/orders/${id}`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
 

@@ -5,6 +5,7 @@ import { AuthContext } from '../../contexts/AuthProvider';
 import { CartContext } from '../../contexts/CartProvider';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import API_BASE from '../../utils/api';
 
 // Initialize Stripe with the provided Test Public Key
 const stripePromise = loadStripe('pk_test_51TBDgpGYkY6jukzH7TAjxwVrk8tuNwiT5llzSErfASoomqxzOW2v1i64Ld5b5957JSgsp99s49Dd9TljfLEKKDbI009yqQbTV8');
@@ -37,7 +38,7 @@ const CheckoutForm = ({ clientSecret, addresses, refreshAddresses }) => {
         e.preventDefault();
         try {
             const token = localStorage.getItem('bookstore-token');
-            const res = await fetch('http://localhost:5000/api/addresses', {
+            const res = await fetch(`${API_BASE}/addresses`, {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
@@ -98,7 +99,7 @@ const CheckoutForm = ({ clientSecret, addresses, refreshAddresses }) => {
             try {
                 // 3. Create the Order in our DB
                 const token = localStorage.getItem('bookstore-token');
-                const orderRes = await fetch('http://localhost:5000/api/orders', {
+                const orderRes = await fetch(`${API_BASE}/orders`, {
                     method: 'POST',
                     headers: { 
                         'Content-Type': 'application/json',
@@ -263,7 +264,7 @@ const Checkout = () => {
     const fetchAddresses = async () => {
         try {
             const token = localStorage.getItem('bookstore-token');
-            const res = await fetch('http://localhost:5000/api/addresses', {
+            const res = await fetch(`${API_BASE}/addresses`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             });
             if (res.ok) {
@@ -291,7 +292,7 @@ const Checkout = () => {
                 await fetchAddresses();
 
                 // 2. Create Payment Intent
-                const res = await fetch("http://localhost:5000/api/orders/create-payment-intent", {
+                const res = await fetch(`${API_BASE}/orders/create-payment-intent`, {
                     method: "POST",
                     headers: { 
                         "Content-Type": "application/json",

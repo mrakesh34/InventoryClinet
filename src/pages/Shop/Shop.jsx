@@ -2,6 +2,7 @@ import React, { useContext, useEffect, useState } from 'react'
 import { Card, Spinner } from 'flowbite-react';
 import { AuthContext } from '../../contexts/AuthProvider';
 import { CartContext } from '../../contexts/CartProvider';
+import API_BASE from '../../utils/api';
 
 export default function Shop() {
   const { loading } = useContext(AuthContext);
@@ -10,7 +11,7 @@ export default function Shop() {
 
   // fetching data
   useEffect(() =>{
-    fetch('http://localhost:5000/api/books')
+    fetch(`${API_BASE}/books`)
     .then(res => res.json())
     .then(data => setBooks(data))
   }, [loading]);

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
 import { HiSearch, HiPlusCircle, HiBookOpen, HiCheckCircle, HiExclamation } from 'react-icons/hi';
+import API_BASE from '../utils/api';
 
 const AddBookStock = () => {
   const [books, setBooks] = useState([]);
@@ -13,7 +14,7 @@ const AddBookStock = () => {
   const [dropdownOpen, setDropdownOpen] = useState(false);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/books')
+    fetch(`${API_BASE}/books`)
       .then(r => r.json())
       .then(data => { setBooks(data); setLoading(false); })
       .catch(() => { toast.error('Failed to load books.'); setLoading(false); });
@@ -44,7 +45,7 @@ const AddBookStock = () => {
     setSaving(true);
     const tid = toast.loading(`Adding ${addQty} unit(s) to "${selectedBook.bookTitle}"...`);
     try {
-      const res = await fetch(`http://localhost:5000/api/books/${selectedBook._id}/stock`, {
+      const res = await fetch(`${API_BASE}/books/${selectedBook._id}/stock`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ stock: newStock, lowStockThreshold: thr }),

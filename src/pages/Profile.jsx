@@ -4,6 +4,7 @@ import { Navigate, useLocation } from "react-router-dom";
 import {
   FaUser, FaEnvelope, FaShoppingBag, FaBoxOpen, FaShoppingCart
 } from "react-icons/fa";
+import API_BASE from '../utils/api';
 
 const Profile = () => {
   const { user, loading } = useContext(AuthContext);
@@ -130,7 +131,7 @@ const MyPurchasesTab = () => {
           return;
         }
 
-        const res = await fetch("http://localhost:5000/api/orders/my-orders", {
+        const res = await fetch(`${API_BASE}/orders/my-orders`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
