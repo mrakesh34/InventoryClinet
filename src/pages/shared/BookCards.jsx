@@ -13,9 +13,22 @@ import { Pagination } from 'swiper/modules';
 import { FaCartShopping } from "react-icons/fa6"
 import { Link } from 'react-router-dom';
 import { CartContext } from '../../contexts/CartProvider';
+import { AuthContext } from '../../contexts/AuthProvider';
+import { useNavigate } from 'react-router-dom';
 
 const BookCards = ({headline, books}) => {
     const { addToCart } = useContext(CartContext);
+    const { currentUser } = useContext(AuthContext);
+    const navigate = useNavigate();
+
+    const handleCartClick = (e, book) => {
+        e.preventDefault();
+        if (!currentUser) {
+            navigate('/login', { state: { from: { pathname: '/shop' } } });
+            return;
+        }
+        addToCart(book);
+    };
 
     return (
         <div className='my-16 px-4 lg:px-24'>
@@ -65,17 +78,14 @@ const BookCards = ({headline, books}) => {
                                             ) : null}
                                         </div>
                                         <div>
-                                            <p className='font-bold text-blue-700'>${book.price ? book.price.toFixed(2) : "10.00"}</p>
+                                            <p className='font-bold text-blue-700'>₹{book.price ? book.price.toFixed(2) : "10.00"}</p>
                                         </div>
                                     </div>
                                 </Link>
 
                                 {/* Floating Add to Cart Button (Separate from Link to avoid navigation) */}
                                 <button 
-                                    onClick={(e) => {
-                                        e.preventDefault();
-                                        addToCart(book);
-                                    }}
+                                    onClick={(e) => handleCartClick(e, book)}
                                     disabled={book.stock === 0}
                                     className={`absolute top-3 right-3 p-3 rounded-full shadow-lg transition-all z-10 ${
                                         book.stock === 0 

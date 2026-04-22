@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { HiSearch, HiEye } from 'react-icons/hi';
+import { HiSearch, HiEye, HiX } from 'react-icons/hi';
 import API_BASE from '../utils/api';
 
 const statusColors = {
@@ -64,38 +64,6 @@ const AdminUsers = () => {
       u.email?.toLowerCase().includes(search.toLowerCase())
   );
 
-  const handleStatusChange = async (orderId, newStatus) => {
-    try {
-      const token = localStorage.getItem('bookstore-token');
-      const res = await fetch(`${API_BASE}/orders/${orderId}/status`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ status: newStatus }),
-      });
-      if (res.ok) {
-        const updated = await res.json();
-        setOrders((prev) =>
-          prev.map((o) => (o._id === orderId ? { ...o, orderStatus: updated.orderStatus } : o))
-        );
-        // Update modal view too
-        if (selectedUser) {
-          setSelectedUser((u) => ({
-            ...u,
-            orders: u.orders.map((o) =>
-              o._id === orderId ? { ...o, orderStatus: updated.orderStatus } : o
-            ),
-          }));
-        }
-      } else {
-        alert('Failed to update order status');
-      }
-    } catch (err) {
-      alert('Network error updating status');
-    }
-  };
 
   const openUserModal = (user) => {
     const userOrders = userOrdersMap[user.email] || [];
@@ -126,7 +94,7 @@ const AdminUsers = () => {
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-800">👥 Users &amp; Purchases</h1>
         <p className="text-gray-500 mt-1">
-          View all registered users and the books they have purchased.
+          View all registered users and their purchase history. Order status is managed by vendors.
         </p>
       </div>
 
@@ -204,7 +172,7 @@ const AdminUsers = () => {
                         <span className="font-bold text-gray-800">{userOrders.length}</span>
                       </td>
                       <td className="px-6 py-4 font-bold text-green-600">
-                        ${totalSpent.toFixed(2)}
+                        ₹{totalSpent.toFixed(2)}
                       </td>
                       <td className="px-6 py-4 text-gray-500">
                         {user.createdAt
@@ -286,7 +254,7 @@ const AdminUsers = () => {
                             {order.paymentStatus}
                           </span>
                           <span className="font-bold text-gray-800">
-                            ${order.totalAmount.toFixed(2)}
+                            ₹{order.totalAmount.toFixed(2)}
                           </span>
                         </div>
                       </div>
@@ -300,28 +268,15 @@ const AdminUsers = () => {
                           >
                             <span>📚 {item.title}</span>
                             <span className="text-gray-500">
-                              x{item.quantity} × ${item.price?.toFixed(2)}
+                              x{item.quantity} × ₹{item.price?.toFixed(2)}
                             </span>
                           </div>
                         ))}
                       </div>
 
-                      {/* Status change */}
+                      {/* Status — read-only for admin, managed by vendors */}
                       <div className="flex items-center gap-3">
                         <span className="text-xs text-gray-500 font-medium">Order Status:</span>
-                        <select
-                          value={order.orderStatus}
-                          onChange={(e) => handleStatusChange(order._id, e.target.value)}
-                          className="text-xs border border-gray-200 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-                        >
-                          {['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'].map(
-                            (s) => (
-                              <option key={s} value={s}>
-                                {s}
-                              </option>
-                            )
-                          )}
-                        </select>
                         <span
                           className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
                             statusColors[order.orderStatus] || 'bg-gray-100 text-gray-600'
@@ -329,6 +284,7 @@ const AdminUsers = () => {
                         >
                           {order.orderStatus}
                         </span>
+                        <span className="text-xs text-gray-400 italic">(managed by vendor)</span>
                       </div>
                     </div>
                   ))}

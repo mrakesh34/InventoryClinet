@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { HiSearch, HiX } from 'react-icons/hi';
+import { HiSearch, HiX, HiDownload } from 'react-icons/hi';
+import { exportToCSV } from '../utils/csvExport';
 import API_BASE from '../utils/api';
 
 const statusColors = {
@@ -36,7 +37,7 @@ const AdminOrders = () => {
       } else {
         setError('Failed to fetch orders.');
       }
-    } catch (err) {
+    } catch {
       setError('Network error fetching orders.');
     } finally {
       setLoading(false);
@@ -47,33 +48,6 @@ const AdminOrders = () => {
     fetchOrders();
   }, []);
 
-  const handleStatusChange = async (orderId, newStatus) => {
-    try {
-      const token = localStorage.getItem('bookstore-token');
-      const res = await fetch(`${API_BASE}/orders/${orderId}/status`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ status: newStatus }),
-      });
-      if (res.ok) {
-        const updatedOrder = await res.json();
-        setOrders((prev) =>
-          prev.map((o) => (o._id === orderId ? { ...o, orderStatus: updatedOrder.orderStatus } : o))
-        );
-        if (viewOrder?._id === orderId) {
-          setViewOrder((prev) => ({ ...prev, orderStatus: updatedOrder.orderStatus }));
-        }
-      } else {
-        alert('Failed to update order status');
-      }
-    } catch (err) {
-      alert('Network error while updating status');
-    }
-  };
-
   const filtered = orders.filter((o) => {
     const matchSearch =
       o.user?.toLowerCase().includes(search.toLowerCase()) ||
@@ -81,6 +55,38 @@ const AdminOrders = () => {
     const matchStatus = filterStatus === 'All' || o.orderStatus === filterStatus;
     return matchSearch && matchStatus;
   });
+
+  const handleExportCSV = () => {
+    const flat = filtered.map(o => ({
+      orderId:       o._id.slice(-8).toUpperCase(),
+      customer:      o.user,
+      date:          new Date(o.createdAt).toLocaleDateString(),
+      total:         o.totalAmount?.toFixed(2),
+      payment:       o.paymentStatus,
+      orderStatus:   o.orderStatus,
+      itemCount:     o.items?.length || 0,
+    }));
+    exportToCSV(flat, 'orders', [
+      { key: 'orderId',     label: 'Order ID' },
+      { key: 'customer',    label: 'Customer' },
+      { key: 'date',        label: 'Date' },
+      { key: 'total',       label: 'Total (₹)' },
+      { key: 'payment',     label: 'Payment' },
+      { key: 'orderStatus', label: 'Order Status' },
+      { key: 'itemCount',   label: 'Item Count' },
+    ]);
+  };
+
+  // Collect unique vendor names from order items
+  const getVendorNames = (order) => {
+    if (!order.items || order.items.length === 0) return '—';
+    const vendorNames = new Set();
+    order.items.forEach((item) => {
+      const vendorName = item.book?.vendorName || item.book?.vendor?.name;
+      if (vendorName) vendorNames.add(vendorName);
+    });
+    return vendorNames.size > 0 ? [...vendorNames].join(', ') : '—';
+  };
 
   if (loading) {
     return (
@@ -99,11 +105,22 @@ const AdminOrders = () => {
   }
 
   return (
-    <div className="w-full px-6 py-8 max-w-6xl">
+    <div className="w-full px-6 py-8 max-w-7xl">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">🛒 Orders Management</h1>
-        <p className="text-gray-500 mt-1">Manage all customer orders and update delivery status.</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-800">🛒 All Orders</h1>
+            <p className="text-gray-500 mt-1">Platform-wide order overview. Order status is managed by vendors.</p>
+          </div>
+          <button
+            onClick={handleExportCSV}
+            disabled={filtered.length === 0}
+            className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl text-sm font-semibold transition-colors disabled:opacity-40"
+          >
+            <HiDownload className="w-4 h-4" /> Export CSV
+          </button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -144,41 +161,47 @@ const AdminOrders = () => {
           <table className="w-full text-sm text-left">
             <thead className="bg-gray-50 text-xs text-gray-500 uppercase border-b border-gray-100">
               <tr>
-                <th className="px-6 py-4">Order ID</th>
-                <th className="px-6 py-4">Customer</th>
-                <th className="px-6 py-4">Date</th>
-                <th className="px-6 py-4">Total</th>
-                <th className="px-6 py-4">Payment</th>
-                <th className="px-6 py-4">Order Status</th>
-                <th className="px-6 py-4">Action</th>
+                <th className="px-5 py-4">Order ID</th>
+                <th className="px-5 py-4">Customer</th>
+                <th className="px-5 py-4">Vendor(s)</th>
+                <th className="px-5 py-4">Date</th>
+                <th className="px-5 py-4">Total</th>
+                <th className="px-5 py-4">Payment</th>
+                <th className="px-5 py-4">Order Status</th>
+                <th className="px-5 py-4">Items</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan="7" className="px-6 py-10 text-center text-gray-400">
+                  <td colSpan="8" className="px-6 py-10 text-center text-gray-400">
                     No orders found.
                   </td>
                 </tr>
               ) : (
                 filtered.map((order) => (
                   <tr key={order._id} className="hover:bg-gray-50 transition-colors">
-                    <td className="px-6 py-4 font-mono text-xs text-gray-400">
+                    <td className="px-5 py-4 font-mono text-xs text-gray-400">
                       #{order._id.slice(-8).toUpperCase()}
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-5 py-4">
                       <div className="font-semibold text-gray-800">{order.user}</div>
                       {order.shippingAddress?.city && (
                         <div className="text-xs text-gray-400">{order.shippingAddress.city}</div>
                       )}
                     </td>
-                    <td className="px-6 py-4 text-gray-500">
+                    <td className="px-5 py-4">
+                      <span className="text-xs font-medium text-purple-700 bg-purple-50 px-2 py-1 rounded-lg">
+                        {getVendorNames(order)}
+                      </span>
+                    </td>
+                    <td className="px-5 py-4 text-gray-500">
                       {new Date(order.createdAt).toLocaleDateString()}
                     </td>
-                    <td className="px-6 py-4 font-bold text-gray-800">
-                      ${order.totalAmount.toFixed(2)}
+                    <td className="px-5 py-4 font-bold text-gray-800">
+                      ₹{order.totalAmount?.toFixed(2)}
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-5 py-4">
                       <span
                         className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
                           paymentColors[order.paymentStatus] || 'bg-gray-100 text-gray-600'
@@ -187,18 +210,17 @@ const AdminOrders = () => {
                         {order.paymentStatus}
                       </span>
                     </td>
-                    <td className="px-6 py-4">
-                      <select
-                        value={order.orderStatus}
-                        onChange={(e) => handleStatusChange(order._id, e.target.value)}
-                        className="text-xs border border-gray-200 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                    <td className="px-5 py-4">
+                      {/* Admin view only — status managed by vendors */}
+                      <span
+                        className={`px-2.5 py-1 rounded-full text-xs font-semibold ${
+                          statusColors[order.orderStatus] || 'bg-gray-100 text-gray-600'
+                        }`}
                       >
-                        {['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'].map((s) => (
-                          <option key={s} value={s}>{s}</option>
-                        ))}
-                      </select>
+                        {order.orderStatus}
+                      </span>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-5 py-4">
                       <button
                         onClick={() => setViewOrder(order)}
                         className="px-3 py-1.5 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 text-xs font-semibold transition-colors"
@@ -230,6 +252,9 @@ const AdminOrders = () => {
                   Order #{viewOrder._id.slice(-8).toUpperCase()}
                 </h3>
                 <p className="text-sm text-gray-500">{viewOrder.user}</p>
+                <p className="text-xs text-purple-600 font-medium mt-0.5">
+                  Vendor: {getVendorNames(viewOrder)}
+                </p>
               </div>
               <button
                 onClick={() => setViewOrder(null)}
@@ -246,15 +271,20 @@ const AdminOrders = () => {
                 >
                   <div>
                     <p className="font-semibold text-gray-800 text-sm">📚 {item.title}</p>
-                    <p className="text-xs text-gray-400">Quantity: {item.quantity}</p>
+                    <p className="text-xs text-gray-400">Qty: {item.quantity}</p>
+                    {(item.book?.vendorName || item.book?.vendor?.name) && (
+                      <p className="text-xs text-purple-600 mt-0.5">
+                        Vendor: {item.book?.vendorName || item.book?.vendor?.name}
+                      </p>
+                    )}
                   </div>
-                  <p className="font-bold text-gray-700">${(item.price * item.quantity).toFixed(2)}</p>
+                  <p className="font-bold text-gray-700">₹{(item.price * item.quantity).toFixed(2)}</p>
                 </div>
               ))}
             </div>
             <div className="px-6 py-4 border-t border-gray-100 flex items-center justify-between">
               <span className="text-sm text-gray-500">Total</span>
-              <span className="text-xl font-bold text-gray-800">${viewOrder.totalAmount.toFixed(2)}</span>
+              <span className="text-xl font-bold text-gray-800">₹{viewOrder.totalAmount?.toFixed(2)}</span>
             </div>
           </div>
         </div>

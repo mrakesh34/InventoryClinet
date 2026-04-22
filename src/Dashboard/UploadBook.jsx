@@ -2,30 +2,11 @@ import React, { useState } from 'react'
 import { Button, Label, Select, TextInput, Textarea, FileInput, Spinner } from 'flowbite-react';
 import toast from 'react-hot-toast';
 import API_BASE from '../utils/api';
+import BOOK_CATEGORIES from '../utils/bookCategories';
 
 const UploadBook = () => {
   const [isUploading, setIsUploading] = useState(false);
-  const bookCategories = [
-    "Fiction",
-    "Non-fiction",
-    "Mystery",
-    "Programming",
-    "Science fiction",
-    "Fantasy",
-    "Horror",
-    "Biography",
-    "Autobiography",
-    "History",
-    "Self-help",
-    "Business",
-    "Memoir",
-    "Poetry",
-    "Children's books",
-    "Travel",
-    "Religion and spirituality",
-    "Science",
-    "Art and design",
-  ];
+  const bookCategories = BOOK_CATEGORIES;
 
 
   const [selectedBookCategory, setSelectedBookCategory] = useState(
@@ -50,8 +31,8 @@ const UploadBook = () => {
     const imageFile = form.imageFile.files[0];
     const pdfFile = form.pdfFile.files[0];
 
-    if (!imageFile || !pdfFile) {
-        toast.error("Please select both an image and a PDF file.");
+    if (!imageFile) {
+        toast.error("Please select a cover image.");
         return;
     }
 
@@ -87,6 +68,7 @@ const UploadBook = () => {
             imageURL: uploadedUrls.imageURL,
             category,
             price: Number(price),
+            costPrice: Number(form.costPrice.value) || 0,
             bookDescription,
             bookPDFURL: uploadedUrls.bookPDFURL,
         };
@@ -227,10 +209,10 @@ const UploadBook = () => {
 
 
         <div className='flex gap-8'>
-          {/* book price */}
+          {/* book selling price */}
           <div className='lg:w-1/2'>
             <div className="mb-2 block">
-              <Label htmlFor="price" value="Book Price ($)" />
+              <Label htmlFor="price" value="Selling Price (₹)" />
             </div>
             <TextInput
               id="price"
@@ -244,21 +226,40 @@ const UploadBook = () => {
             />
           </div>
 
+          {/* cost price */}
+          <div className='lg:w-1/2'>
+            <div className="mb-2 block">
+              <Label htmlFor="costPrice" value="Cost Price (₹) — for profit tracking" />
+            </div>
+            <TextInput
+              id="costPrice"
+              placeholder="0.00"
+              type="number"
+              step="0.01"
+              min="0"
+              name='costPrice'
+              className='w-full'
+            />
+            <p className="text-xs text-gray-400 mt-1">Optional. Used for inventory valuation only.</p>
+          </div>
+        </div>
+
+        <div className='flex gap-8'>
           {/* book pdf upload */}
           <div className='lg:w-1/2'>
             <div className="mb-2 block">
               <Label
                 htmlFor="pdfFile"
-                value="Upload Book PDF"
+                value="Upload Book PDF (Optional)"
               />
             </div>
             <FileInput
               id="pdfFile"
               name='pdfFile'
               accept="application/pdf"
-              required
               className='w-full'
             />
+            <p className="text-xs text-gray-500 mt-1">Leave empty to skip PDF.</p>
           </div>
         </div>
 

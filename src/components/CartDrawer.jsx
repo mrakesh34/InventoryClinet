@@ -80,13 +80,13 @@ const CartDrawer = () => {
                                         </div>
 
                                         <div className="flex justify-between items-end mt-2">
-                                            <p className="font-bold text-blue-600">${(item.book.price || 10).toFixed(2)}</p>
+                                            <p className="font-bold text-blue-600">₹{(item.book.price || 10).toFixed(2)}</p>
 
                                             {/* Quantity Controls */}
                                             <div className="flex items-center gap-3">
                                                 <div className="flex items-center border border-gray-200 rounded-lg">
                                                     <button
-                                                        onClick={() => updateQuantity(item.book._id, item.quantity - 1)}
+                                                        onClick={() => updateQuantity(item.book._id, item.quantity - 1, item.book.stock)}
                                                         className="px-2 py-1 text-gray-500 hover:text-blue-600 transition-colors"
                                                         disabled={item.quantity <= 1}
                                                     >
@@ -95,12 +95,17 @@ const CartDrawer = () => {
                                                     <span className="text-sm font-medium w-6 text-center">{item.quantity}</span>
                                                     <button
                                                         onClick={() => updateQuantity(item.book._id, item.quantity + 1, item.book.stock)}
-                                                        className={`px-2 py-1 transition-colors ${item.quantity >= (item.book.stock ?? Infinity)
+                                                        className={`px-2 py-1 transition-colors ${
+                                                            item.quantity >= Math.min(5, item.book.stock ?? 5)
                                                                 ? 'text-gray-300 cursor-not-allowed'
                                                                 : 'text-gray-500 hover:text-blue-600'
-                                                            }`}
-                                                        disabled={item.quantity >= (item.book.stock ?? Infinity)}
-                                                        title={item.quantity >= (item.book.stock ?? Infinity) ? "Max stock reached" : "Increase quantity"}
+                                                        }`}
+                                                        disabled={item.quantity >= Math.min(5, item.book.stock ?? 5)}
+                                                        title={
+                                                            item.quantity >= Math.min(5, item.book.stock ?? 5)
+                                                                ? (item.book.stock < 5 ? `Only ${item.book.stock} in stock` : 'Max 5 per book')
+                                                                : 'Increase quantity'
+                                                        }
                                                     >
                                                         <FaPlus className="w-3 h-3" />
                                                     </button>
@@ -127,7 +132,7 @@ const CartDrawer = () => {
                     <div className="absolute bottom-0 left-0 right-0 p-6 bg-white border-t border-gray-100 shadow-[0_-10px_30px_rgba(0,0,0,0.05)]">
                         <div className="flex justify-between items-center mb-4">
                             <span className="text-gray-500 font-medium">Subtotal</span>
-                            <span className="text-xl font-bold text-gray-800">${getCartTotal().toFixed(2)}</span>
+                            <span className="text-xl font-bold text-gray-800">₹{getCartTotal().toFixed(2)}</span>
                         </div>
                         <p className="text-xs text-gray-400 mb-4">Taxes and shipping calculated at checkout</p>
 

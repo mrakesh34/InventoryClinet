@@ -4,7 +4,6 @@ import BookCards from '../shared/BookCards'
 import FavoriteBook from './FavoriteBook'
 import BestSeller from './BestSeller'
 import OtherBooks from './OtherBooks'
-import PromoBanner from './PromoBanner'
 import Review from './Review'
 
 export const Home = () => {
@@ -13,7 +12,6 @@ export const Home = () => {
       <Banner/>
       <BestSeller/>
       <FavoriteBook/>
-      <PromoBanner/>
       <OtherBooks/>
       <Review/>
     </div>

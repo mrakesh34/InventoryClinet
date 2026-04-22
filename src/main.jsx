@@ -23,7 +23,7 @@ ReactDOM.createRoot(document.getElementById('root')).render(
               boxShadow: '0 4px 24px rgba(0,0,0,0.10)',
             },
             success: { style: { background: '#f0fdf4', color: '#166534' } },
-            error:   { style: { background: '#fef2f2', color: '#991b1b' } },
+            error: { style: { background: '#fef2f2', color: '#991b1b' } },
           }}
         />
         <RouterProvider router={router}></RouterProvider>

@@ -3,11 +3,14 @@ import React, { useEffect, useState } from 'react';
 import { Pagination } from 'flowbite-react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { HiDownload } from 'react-icons/hi';
+import { exportToCSV } from '../utils/csvExport';
 import API_BASE from '../utils/api';
 
 const ManageBooks = () => {
     const [allBooks, setAllBooks] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
+    const [waitlistMap, setWaitlistMap] = useState({});
     const ITEMS_PER_PAGE = 10;
 
     useEffect(() => {
@@ -17,6 +20,19 @@ const ManageBooks = () => {
                 setAllBooks(data);
             })
             .catch(() => toast.error('Failed to load books.'));
+
+        // Fetch waitlist summary
+        const token = localStorage.getItem('bookstore-token');
+        fetch(`${API_BASE}/waitlist/summary`, {
+            headers: { Authorization: `Bearer ${token}` },
+        })
+            .then(res => res.ok ? res.json() : [])
+            .then(data => {
+                const map = {};
+                data.forEach(item => { map[item._id] = item.count; });
+                setWaitlistMap(map);
+            })
+            .catch(() => {});
     }, []);
 
     // Delete a book
@@ -42,9 +58,34 @@ const ManageBooks = () => {
     const LOW_STOCK = (book) => book.stock !== undefined && book.stock <= (book.lowStockThreshold ?? 5);
     const OUT_OF_STOCK = (book) => book.stock !== undefined && book.stock === 0;
 
+    const handleExportCSV = () => {
+        exportToCSV(
+            allBooks,
+            'inventory',
+            [
+                { key: 'bookTitle',   label: 'Book Title' },
+                { key: 'authorName',  label: 'Author' },
+                { key: 'category',    label: 'Category' },
+                { key: 'price',       label: 'Selling Price' },
+                { key: 'costPrice',   label: 'Cost Price' },
+                { key: 'stock',       label: 'Stock' },
+                { key: 'lowStockThreshold', label: 'Min Threshold' },
+            ]
+        );
+    };
+
     return (
         <div className='px-4 my-12 w-full max-w-6xl'>
-            <h2 className='mb-8 text-3xl font-bold'>📚 Books Inventory</h2>
+            <div className="flex items-center justify-between mb-8">
+                <h2 className='text-3xl font-bold'>📚 Books Inventory</h2>
+                <button
+                    onClick={handleExportCSV}
+                    disabled={allBooks.length === 0}
+                    className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl text-sm font-semibold transition-colors disabled:opacity-40"
+                >
+                    <HiDownload className="w-4 h-4" /> Export CSV
+                </button>
+            </div>
 
             <Table className='w-full'>
                 <Table.Head>
@@ -77,9 +118,16 @@ const ManageBooks = () => {
                             <Table.Cell>${book.price?.toFixed(2) ?? '—'}</Table.Cell>
                             <Table.Cell>
                                 {OUT_OF_STOCK(book) ? (
-                                    <span className="px-2 py-1 bg-red-100 text-red-700 text-xs rounded-full font-bold">
-                                        Out of Stock
-                                    </span>
+                                    <div className="flex flex-col gap-1">
+                                        <span className="px-2 py-1 bg-red-100 text-red-700 text-xs rounded-full font-bold">
+                                            Out of Stock
+                                        </span>
+                                        {waitlistMap[book._id] > 0 && (
+                                            <span className="px-2 py-0.5 bg-purple-100 text-purple-700 text-[10px] rounded-full font-bold">
+                                                🕐 {waitlistMap[book._id]} waiting
+                                            </span>
+                                        )}
+                                    </div>
                                 ) : LOW_STOCK(book) ? (
                                     <span className="px-2 py-1 bg-orange-100 text-orange-700 text-xs rounded-full font-bold">
                                         Low ({book.stock})

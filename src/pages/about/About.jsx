@@ -1,121 +1,148 @@
-import React from 'react'
-import { BsCloudArrowUp } from 'react-icons/bs';
-import { HiLockClosed, HiServer } from "react-icons/hi";
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { HiBookOpen, HiShieldCheck, HiUserGroup, HiCube, HiChartBar, HiCreditCard } from 'react-icons/hi';
+
+const TEAM = [
+    { name: 'Rakesh Rout', initials: 'RR', color: 'from-blue-500 to-indigo-600' },
+    { name: 'Udit Kumar Patel', initials: 'UP', color: 'from-purple-500 to-pink-500' },
+    { name: 'Rajalaxmi Sahu', initials: 'RS', color: 'from-orange-400 to-red-500' },
+    { name: 'Santosh Barik', initials: 'SB', color: 'from-green-500 to-teal-500' },
+];
+
+const FEATURES = [
+    { icon: HiBookOpen, title: 'Book Inventory', desc: 'Browse, search, and manage a vast collection of books across multiple categories with real-time stock tracking.' },
+    { icon: HiUserGroup, title: 'Multi-Vendor System', desc: 'Vendors can register, list their books, manage inventory, and track earnings — all from a dedicated dashboard.' },
+    { icon: HiShieldCheck, title: 'Secure Authentication', desc: 'JWT-based login with email OTP verification at signup. Role-based access control for Users, Vendors, and Admins.' },
+    { icon: HiCreditCard, title: 'Stripe Payments', desc: 'Secure online checkout powered by Stripe. Card details never touch our server — fully PCI compliant.' },
+    { icon: HiChartBar, title: 'Analytics & Reports', desc: 'Admin dashboard with real-time charts, top sellers, revenue breakdown, category analysis, and inventory valuation.' },
+    { icon: HiCube, title: 'Stock Management', desc: 'Complete audit trail of stock-in/stock-out operations. Low stock alerts and automated notifications for out-of-stock items.' },
+];
+
+const TECH = [
+    { name: 'React.js', desc: 'Frontend UI', emoji: '⚛️' },
+    { name: 'Node.js', desc: 'Backend Runtime', emoji: '🟢' },
+    { name: 'Express.js', desc: 'REST API Server', emoji: '🚀' },
+    { name: 'MongoDB', desc: 'NoSQL Database', emoji: '🍃' },
+    { name: 'Stripe', desc: 'Payment Gateway', emoji: '💳' },
+    { name: 'JWT', desc: 'Authentication', emoji: '🔐' },
+    { name: 'Nodemailer', desc: 'Email OTP', emoji: '📧' },
+    { name: 'Cloudinary', desc: 'Image Storage', emoji: '☁️' },
+];
 
 const About = () => {
-  return (
-    <div className='mt-20'>
-        <div className="relative isolate overflow-hidden bg-white px-6 py-24 sm:py-32 lg:overflow-visible lg:px-0">
-      <div className="absolute inset-0 -z-10 overflow-hidden">
-        <svg
-          className="absolute left-[max(50%,25rem)] top-0 h-[64rem] w-[128rem] -translate-x-1/2 stroke-gray-200 [mask-image:radial-gradient(64rem_64rem_at_top,white,transparent)]"
-          aria-hidden="true"
-        >
-          <defs>
-            <pattern
-              id="e813992c-7d03-4cc4-a2bd-151760b470a0"
-              width={200}
-              height={200}
-              x="50%"
-              y={-1}
-              patternUnits="userSpaceOnUse"
-            >
-              <path d="M100 200V.5M.5 .5H200" fill="none" />
-            </pattern>
-          </defs>
-          <svg x="50%" y={-1} className="overflow-visible fill-gray-50">
-            <path
-              d="M-100.5 0h201v201h-201Z M699.5 0h201v201h-201Z M499.5 400h201v201h-201Z M-300.5 600h201v201h-201Z"
-              strokeWidth={0}
-            />
-          </svg>
-          <rect width="100%" height="100%" strokeWidth={0} fill="url(#e813992c-7d03-4cc4-a2bd-151760b470a0)" />
-        </svg>
-      </div>
-      <div className="mx-auto grid max-w-2xl grid-cols-1 gap-x-8 gap-y-16 lg:mx-0 lg:max-w-none lg:grid-cols-2 lg:items-start lg:gap-y-10">
-        <div className="lg:col-span-2 lg:col-start-1 lg:row-start-1 lg:mx-auto lg:grid lg:w-full lg:max-w-7xl lg:grid-cols-2 lg:gap-x-8 lg:px-8">
-          <div className="lg:pr-4">
-            <div className="lg:max-w-lg">
-              <p className="text-base font-semibold leading-7 text-indigo-600">description</p>
-              <h1 className="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">The Book Inventory Management System</h1>
-              <p className="mt-6 text-xl leading-8 text-gray-700">
-               
-
-The Book Inventory Management System is a software application developed to efficiently manage and organize book records in a library or bookstore. The system helps in maintaining details of books such as book ID, title, author name, publisher, quantity available, price, and category.
-
-This project is designed to reduce manual work and improve accuracy in maintaining book records. It provides an easy-to-use interface for adding new books, updating book details, deleting records, and searching for specific books.
-
-
-              </p>
+    return (
+        <div className='mt-20'>
+            {/* ── Hero Section ── */}
+            <div className='bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 px-4 lg:px-24 py-20'>
+                <div className='max-w-4xl mx-auto text-center'>
+                    <div className='inline-flex items-center gap-2 bg-blue-100 text-blue-700 px-4 py-1.5 rounded-full text-sm font-semibold mb-6'>
+                        <HiBookOpen className='w-4 h-4' />
+                        MCA Final Year Project — USBM
+                    </div>
+                    <h1 className='text-4xl lg:text-5xl font-extrabold text-gray-900 mb-5 leading-tight'>
+                        About <span className='text-blue-600'>Book Vault</span>
+                    </h1>
+                    <p className='text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed'>
+                        Book Vault is a full-stack web-based inventory management system for books, built using the <strong>MERN Stack</strong>. 
+                        It enables customers to browse and purchase books, vendors to manage their inventory, and administrators to oversee 
+                        the entire platform — including orders, stock tracking, analytics, and vendor settlements.
+                    </p>
+                </div>
             </div>
-          </div>
-        </div>
-        <div className="-ml-12 -mt-12 p-12 lg:sticky lg:top-4 lg:col-start-2 lg:row-span-2 lg:row-start-1 lg:overflow-hidden">
-          <img
-            className="w-[48rem] max-w-none rounded-xl bg-gray-900 shadow-xl ring-1 ring-gray-400/10 sm:w-[57rem]"
-            src="https://tailwindui.com/img/component-images/dark-project-app-screenshot.png"
-            alt=""
-          />
-        </div>
-        <div className="lg:col-span-2 lg:col-start-1 lg:row-start-2 lg:mx-auto lg:grid lg:w-full lg:max-w-7xl lg:grid-cols-2 lg:gap-x-8 lg:px-8">
-          <div className="lg:pr-4">
-            <div className="max-w-xl text-base leading-7 text-gray-700 lg:max-w-lg">
-              <p>
-              The system also keeps track of stock availability and helps in identifying out-of-stock books. By digitizing the inventory process, the system ensures better data management, faster access to information, and improved operational efficiency...
-              </p>
-              <ul role="list" className="mt-8 space-y-8 text-gray-600">
-                <li className="flex gap-x-3">
-                  <BsCloudArrowUp className="mt-1 h-5 w-5 flex-none text-indigo-600" aria-hidden="true" />
-                  <span>
-                    <strong className="font-semibold text-gray-900"> 🎯 Objectives of the Project</strong>
-                    <ol>
 
-To automate the book inventory process <br />
-
-To maintain accurate book records <br />
-
-To reduce manual errors in stock management <br />
-
-To provide quick search and update functionality  <br />
-
-To generate reports of available and issued books <br />
-</ol>
-                  </span>
-                </li>
-                {/* <li className="flex gap-x-3">
-                  <HiLockClosed className="mt-1 h-5 w-5 flex-none text-indigo-600" aria-hidden="true" />
-                  <span>
-                    <strong className="font-semibold text-gray-900">SSL certificates.</strong> Anim aute id magna aliqua
-                    ad ad non deserunt sunt. Qui irure qui lorem cupidatat commodo.
-                  </span>
-                </li> */}
-                {/* <li className="flex gap-x-3">
-                  <HiServer className="mt-1 h-5 w-5 flex-none text-indigo-600" aria-hidden="true" />
-                  <span>
-                    <strong className="font-semibold text-gray-900">Database backups.</strong> Ac tincidunt sapien
-                    vehicula erat auctor pellentesque rhoncus. Et magna sit morbi lobortis.
-                  </span>
-                </li> */}
-              </ul>
-              {/* <p className="mt-8">
-                Et vitae blandit facilisi magna lacus commodo. Vitae sapien duis odio id et. Id blandit molestie auctor
-                fermentum dignissim. Lacus diam tincidunt ac cursus in vel. Mauris varius vulputate et ultrices hac
-                adipiscing egestas. Iaculis convallis ac tempor et ut. Ac lorem vel integer orci.
-              </p>
-              <h2 className="mt-16 text-2xl font-bold tracking-tight text-gray-900">No server? No problem.</h2> */}
-              {/* <p className="mt-6">
-                Id orci tellus laoreet id ac. Dolor, aenean leo, ac etiam consequat in. Convallis arcu ipsum urna nibh.
-                Pharetra, euismod vitae interdum mauris enim, consequat vulputate nibh. Maecenas pellentesque id sed
-                tellus mauris, ultrices mauris. Tincidunt enim cursus ridiculus mi. Pellentesque nam sed nullam sed diam
-                turpis ipsum eu a sed convallis diam.
-              </p> */}
+            {/* ── Problem & Solution ── */}
+            <div className='px-4 lg:px-24 py-16'>
+                <div className='max-w-5xl mx-auto grid md:grid-cols-2 gap-10'>
+                    <div className='bg-red-50 border border-red-100 rounded-2xl p-8'>
+                        <h3 className='text-xl font-bold text-red-700 mb-4'>❌ The Problem</h3>
+                        <ul className='space-y-3 text-gray-700 text-sm'>
+                            <li className='flex items-start gap-2'><span className='text-red-400 mt-1'>•</span>Traditional bookstores manage inventory manually using registers and spreadsheets</li>
+                            <li className='flex items-start gap-2'><span className='text-red-400 mt-1'>•</span>No real-time stock visibility — leading to over-ordering or stock-outs</li>
+                            <li className='flex items-start gap-2'><span className='text-red-400 mt-1'>•</span>Customers have no way to browse or buy books online</li>
+                            <li className='flex items-start gap-2'><span className='text-red-400 mt-1'>•</span>No centralized platform for multiple book vendors to sell together</li>
+                        </ul>
+                    </div>
+                    <div className='bg-green-50 border border-green-100 rounded-2xl p-8'>
+                        <h3 className='text-xl font-bold text-green-700 mb-4'>✅ Our Solution</h3>
+                        <ul className='space-y-3 text-gray-700 text-sm'>
+                            <li className='flex items-start gap-2'><span className='text-green-500 mt-1'>•</span>Fully digital inventory with real-time stock tracking and audit trails</li>
+                            <li className='flex items-start gap-2'><span className='text-green-500 mt-1'>•</span>Online shop with search, filters, cart, and secure Stripe payments</li>
+                            <li className='flex items-start gap-2'><span className='text-green-500 mt-1'>•</span>Multi-vendor marketplace — vendors register, list, and manage their own books</li>
+                            <li className='flex items-start gap-2'><span className='text-green-500 mt-1'>•</span>Admin dashboard with analytics, reports, and automated commission system</li>
+                        </ul>
+                    </div>
+                </div>
             </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    </div>
-  )
-}
 
-export default About
+            {/* ── Key Features ── */}
+            <div className='bg-gray-50 px-4 lg:px-24 py-16'>
+                <div className='max-w-5xl mx-auto'>
+                    <h2 className='text-3xl font-bold text-center text-gray-900 mb-3'>Key Features</h2>
+                    <p className='text-center text-gray-500 mb-10'>Everything you need in a modern book management platform</p>
+                    <div className='grid md:grid-cols-2 lg:grid-cols-3 gap-6'>
+                        {FEATURES.map((f, i) => (
+                            <div key={i} className='bg-white rounded-xl border border-gray-100 p-6 hover:shadow-lg hover:border-blue-200 transition-all duration-300'>
+                                <f.icon className='w-8 h-8 text-blue-600 mb-3' />
+                                <h4 className='font-bold text-gray-900 mb-2'>{f.title}</h4>
+                                <p className='text-sm text-gray-500 leading-relaxed'>{f.desc}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+
+            {/* ── Tech Stack ── */}
+            <div className='px-4 lg:px-24 py-16'>
+                <div className='max-w-5xl mx-auto'>
+                    <h2 className='text-3xl font-bold text-center text-gray-900 mb-3'>Technology Stack</h2>
+                    <p className='text-center text-gray-500 mb-10'>Built with modern, industry-standard technologies</p>
+                    <div className='grid grid-cols-2 md:grid-cols-4 gap-4'>
+                        {TECH.map((t, i) => (
+                            <div key={i} className='bg-white border border-gray-200 rounded-xl p-5 text-center hover:border-blue-300 hover:shadow-md transition-all duration-300'>
+                                <span className='text-2xl block mb-2'>{t.emoji}</span>
+                                <h5 className='font-bold text-gray-800 text-sm'>{t.name}</h5>
+                                <p className='text-xs text-gray-400 mt-1'>{t.desc}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+
+            {/* ── Team Section ── */}
+            <div className='bg-gradient-to-br from-gray-900 to-gray-800 px-4 lg:px-24 py-16'>
+                <div className='max-w-4xl mx-auto text-center'>
+                    <h2 className='text-3xl font-bold text-white mb-3'>Meet the Team</h2>
+                    <p className='text-gray-400 mb-10'>Built with ❤️ by MCA students at USBM, Bhubaneswar</p>
+                    <div className='grid grid-cols-2 md:grid-cols-4 gap-6'>
+                        {TEAM.map((m, i) => (
+                            <div key={i} className='bg-gray-800/50 border border-gray-700 rounded-2xl p-6 hover:border-gray-500 transition-all duration-300'>
+                                <div className={`w-16 h-16 rounded-full bg-gradient-to-br ${m.color} flex items-center justify-center text-white text-xl font-bold mx-auto mb-4 shadow-lg`}>
+                                    {m.initials}
+                                </div>
+                                <h4 className='text-white font-semibold text-sm'>{m.name}</h4>
+                                <p className='text-gray-500 text-xs mt-1'>MCA, USBM</p>
+                            </div>
+                        ))}
+                    </div>
+                    <p className='text-gray-500 text-sm mt-8'>
+                        {/* Project Guide: <span className='text-gray-400 font-medium'>Sudarshen Bera</span> */}
+                    </p>
+                </div>
+            </div>
+
+            {/* ── CTA ── */}
+            <div className='px-4 lg:px-24 py-16 text-center'>
+                <h2 className='text-2xl font-bold text-gray-900 mb-3'>Ready to explore?</h2>
+                <p className='text-gray-500 mb-6'>Browse our collection of books and find your next great read.</p>
+                <Link
+                    to='/shop'
+                    className='inline-block bg-blue-600 text-white font-semibold px-8 py-3 rounded-xl hover:bg-blue-700 transition-all duration-200 shadow-lg hover:shadow-xl'
+                >
+                    Browse Books →
+                </Link>
+            </div>
+        </div>
+    );
+};
+
+export default About;

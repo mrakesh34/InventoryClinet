@@ -1,128 +1,248 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../../contexts/AuthProvider';
+import { useNavigate } from 'react-router-dom';
+import {
+    FaBoxOpen, FaShoppingCart, FaChevronRight,
+    FaCheckCircle, FaBan, FaSearch
+} from 'react-icons/fa';
+import { MdLocalShipping } from 'react-icons/md';
 import API_BASE from '../../utils/api';
+
+// ── Delivery estimate from order date ─────────────────────────────────────────
+const getDeliveryRange = (orderDate) => {
+    const fmt = (d) => d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', weekday: 'short' });
+    const base = new Date(orderDate);
+    const min = new Date(base); min.setDate(min.getDate() + 5);
+    const max = new Date(base); max.setDate(max.getDate() + 7);
+    return { min: fmt(min), max: fmt(max) };
+};
+
+// ── Status config ──────────────────────────────────────────────────────────────
+const STATUS = {
+    Delivered:  { color: 'bg-emerald-100 text-emerald-700 border-emerald-200', bar: 'bg-emerald-500', icon: <FaCheckCircle className="w-3 h-3" /> },
+    Shipped:    { color: 'bg-blue-100 text-blue-700 border-blue-200',          bar: 'bg-blue-500',    icon: <MdLocalShipping className="w-3.5 h-3.5" /> },
+    Processing: { color: 'bg-amber-100 text-amber-700 border-amber-200',       bar: 'bg-amber-500',   icon: null },
+    Pending:    { color: 'bg-gray-100 text-gray-500 border-gray-200',          bar: 'bg-gray-400',    icon: null },
+    Cancelled:  { color: 'bg-red-100 text-red-600 border-red-200',             bar: 'bg-red-500',     icon: <FaBan className="w-3 h-3" /> },
+};
+
+const FILTERS = ['All', 'Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'];
 
 const UserOrders = () => {
     const { user } = useContext(AuthContext);
-    const [orders, setOrders] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const navigate  = useNavigate();
+    const [orders, setOrders]     = useState([]);
+    const [loading, setLoading]   = useState(true);
+    const [error, setError]       = useState(null);
+    const [filter, setFilter]     = useState('All');
+    const [search, setSearch]     = useState('');
 
     useEffect(() => {
-        const fetchOrders = async () => {
+        (async () => {
             try {
                 const token = localStorage.getItem('bookstore-token');
-                if (!token) {
-                    setLoading(false);
-                    return;
-                }
-                
+                if (!token) { setLoading(false); return; }
                 const res = await fetch(`${API_BASE}/orders/my-orders`, {
-                    headers: {
-                        'Authorization': `Bearer ${token}`
-                    }
+                    headers: { Authorization: `Bearer ${token}` }
                 });
-                
-                if (res.ok) {
-                    const data = await res.json();
-                    setOrders(data);
-                } else {
-                    setError('Failed to fetch orders.');
-                }
-            } catch (err) {
-                console.error(err);
-                setError('Network error fetching orders.');
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchOrders();
+                if (res.ok) setOrders(await res.json());
+                else setError('Failed to fetch orders.');
+            } catch { setError('Network error fetching orders.'); }
+            finally  { setLoading(false); }
+        })();
     }, []);
 
-    if (loading) {
-        return <div className="container mx-auto p-8 mt-20">Loading your orders...</div>;
-    }
+    const displayed = orders
+        .filter(o => filter === 'All' || o.orderStatus === filter)
+        .filter(o =>
+            !search ||
+            o._id.toLowerCase().includes(search.toLowerCase()) ||
+            o.items.some(i => i.title?.toLowerCase().includes(search.toLowerCase()))
+        );
 
-    if (error) {
-        return <div className="container mx-auto p-8 mt-20 text-red-600">{error}</div>;
-    }
+    if (loading) return (
+        <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50 gap-3">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600" />
+            <p className="text-gray-400 text-sm">Loading your orders…</p>
+        </div>
+    );
+
+    if (error) return (
+        <div className="min-h-screen flex items-center justify-center">
+            <p className="text-red-500">{error}</p>
+        </div>
+    );
 
     return (
-        <div className="container mx-auto p-4 md:p-8 mt-20 min-h-screen">
-            <h1 className="text-3xl font-bold mb-8 text-gray-800 border-b pb-4">My Orders</h1>
-            
-            {orders.length === 0 ? (
-                <div className="bg-white p-8 rounded-xl shadow-sm text-center">
-                    <div className="text-4xl mb-4">📦</div>
-                    <h2 className="text-xl font-semibold text-gray-700">No orders yet</h2>
-                    <p className="text-gray-500 mt-2">When you buy books, your orders will appear here.</p>
+        <div className="min-h-screen bg-gradient-to-br from-slate-100 via-blue-50/40 to-indigo-50 pt-24 pb-16 px-4">
+            <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
+
+                {/* ── Page Header ── */}
+                <div className="mb-8">
+                    <h1 className="text-3xl font-extrabold text-gray-900 mb-1">My Orders</h1>
+                    <p className="text-gray-500 text-sm">Track and manage all your Book Vault purchases</p>
                 </div>
-            ) : (
-                <div className="space-y-6">
-                    {orders.map((order) => (
-                        <div key={order._id} className="bg-white border text-left border-gray-100 rounded-xl shadow-sm overflow-hidden">
-                            {/* Order Header */}
-                            <div className="bg-gray-50 flex flex-wrap justify-between items-center p-4 border-b border-gray-100">
-                                <div>
-                                    <p className="text-xs text-gray-500 uppercase font-semibold">Order Placed</p>
-                                    <p className="text-sm text-gray-800">{new Date(order.createdAt).toLocaleDateString()}</p>
+
+                {/* ── Search + Filters ── */}
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-6 space-y-3">
+                    {/* Search */}
+                    <div className="relative">
+                        <FaSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-300 w-4 h-4" />
+                        <input
+                            type="text"
+                            placeholder="Search by book title or order ID…"
+                            value={search}
+                            onChange={e => setSearch(e.target.value)}
+                            className="w-full pl-10 pr-4 py-2.5 text-sm border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 bg-gray-50"
+                        />
+                    </div>
+                    {/* Filter pills */}
+                    <div className="flex flex-wrap gap-2">
+                        {FILTERS.map(f => (
+                            <button
+                                key={f}
+                                onClick={() => setFilter(f)}
+                                className={`px-4 py-1.5 text-xs font-bold rounded-full border transition-all ${
+                                    filter === f
+                                        ? 'bg-blue-600 text-white border-blue-600 shadow-sm shadow-blue-200'
+                                        : 'bg-white text-gray-500 border-gray-200 hover:border-blue-300 hover:text-blue-600'
+                                }`}
+                            >
+                                {f}
+                            </button>
+                        ))}
+                        <span className="ml-auto text-xs text-gray-400 self-center">{displayed.length} result{displayed.length !== 1 ? 's' : ''}</span>
+                    </div>
+                </div>
+
+                {/* ── Empty State ── */}
+                {displayed.length === 0 && (
+                    <div className="flex flex-col items-center justify-center py-20 gap-5">
+                        <div className="w-24 h-24 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-3xl flex items-center justify-center shadow-inner">
+                            <FaBoxOpen className="w-12 h-12 text-blue-400" />
+                        </div>
+                        <div className="text-center">
+                            <h3 className="text-xl font-extrabold text-gray-800 mb-1">
+                                {search || filter !== 'All' ? 'No orders match your search' : 'No Orders Yet'}
+                            </h3>
+                            <p className="text-gray-500 text-sm max-w-xs mx-auto">
+                                {search || filter !== 'All'
+                                    ? 'Try adjusting your filters or search term.'
+                                    : 'When you buy books, they will appear here.'}
+                            </p>
+                        </div>
+                        {!search && filter === 'All' && (
+                            <button
+                                onClick={() => navigate('/shop')}
+                                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-bold px-7 py-3 rounded-xl transition-all shadow-lg shadow-blue-200"
+                            >
+                                <FaShoppingCart className="w-4 h-4" /> Browse Books
+                            </button>
+                        )}
+                    </div>
+                )}
+
+                {/* ── Order Cards ── */}
+                <div className="space-y-4">
+                    {displayed.map((order) => {
+                        const s = STATUS[order.orderStatus] || STATUS.Pending;
+                        const { min: dMin, max: dMax } = getDeliveryRange(order.createdAt);
+                        const totalItems = order.items.reduce((acc, i) => acc + i.quantity, 0);
+
+                        return (
+                            <div
+                                key={order._id}
+                                onClick={() => navigate(`/purchase/${order._id}`)}
+                                className="group bg-white rounded-2xl shadow-sm border border-gray-100 hover:shadow-xl hover:border-blue-200 cursor-pointer transition-all duration-200 overflow-hidden"
+                            >
+                                {/* Top colour bar */}
+                                <div className={`h-1.5 w-full ${s.bar}`} />
+
+                                {/* Header */}
+                                <div className="px-5 pt-4 pb-3 flex flex-wrap items-center justify-between gap-3">
+                                    <div className="flex flex-wrap items-center gap-5">
+                                        {/* Date */}
+                                        <div>
+                                            <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-0.5">Placed on</p>
+                                            <p className="text-sm font-semibold text-gray-800">
+                                                {new Date(order.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                                            </p>
+                                        </div>
+                                        {/* Order ID */}
+                                        <div>
+                                            <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-0.5">Order ID</p>
+                                            <p className="text-sm font-mono font-semibold text-gray-600">#{order._id.slice(-8).toUpperCase()}</p>
+                                        </div>
+                                        {/* Items count */}
+                                        <div>
+                                            <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-0.5">Items</p>
+                                            <p className="text-sm font-semibold text-gray-800">{totalItems} book{totalItems !== 1 ? 's' : ''}</p>
+                                        </div>
+                                        {/* Total */}
+                                        <div>
+                                            <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-0.5">Total</p>
+                                            <p className="text-sm font-extrabold text-blue-700">₹{order.totalAmount.toFixed(2)}</p>
+                                        </div>
+                                    </div>
+
+                                    {/* Status + arrow */}
+                                    <div className="flex items-center gap-2">
+                                        <span className={`inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-full border ${s.color}`}>
+                                            {s.icon} {order.orderStatus}
+                                        </span>
+                                        <FaChevronRight className="w-3.5 h-3.5 text-gray-300 group-hover:text-blue-400 transition-colors" />
+                                    </div>
                                 </div>
-                                <div>
-                                    <p className="text-xs text-gray-500 uppercase font-semibold">Total</p>
-                                    <p className="text-sm font-bold text-gray-800">${order.totalAmount.toFixed(2)}</p>
-                                </div>
-                                <div>
-                                    <p className="text-xs text-gray-500 uppercase font-semibold">Order #</p>
-                                    <p className="text-sm text-gray-800 font-mono">{order._id.substring(order._id.length - 8)}</p>
-                                </div>
-                                <div>
-                                    <p className="text-xs text-gray-500 uppercase font-semibold text-right">Status</p>
-                                    <span className={`inline-block px-3 py-1 mt-1 text-xs font-semibold rounded-full ${
-                                        order.orderStatus === 'Delivered' ? 'bg-green-100 text-green-700' :
-                                        order.orderStatus === 'Shipped' ? 'bg-blue-100 text-blue-700' :
-                                        order.orderStatus === 'Cancelled' ? 'bg-red-100 text-red-700' :
-                                        order.orderStatus === 'Processing' ? 'bg-yellow-100 text-yellow-700' :
-                                        'bg-gray-100 text-gray-700'
-                                    }`}>
-                                        {order.orderStatus}
-                                    </span>
-                                </div>
-                            </div>
-                            
-                            {/* Order Body */}
-                            <div className="p-4 md:flex gap-6">
-                                <div className="flex-1 space-y-4">
-                                    <h4 className="font-semibold text-gray-800 mb-2 border-b pb-2">Items</h4>
-                                    {order.items.map((item, idx) => (
-                                        <div key={idx} className="flex justify-between items-center border-b border-gray-50 pb-2">
-                                            <div>
-                                                <p className="font-medium text-sm text-gray-800 hover:text-blue-600 line-clamp-1">{item.title}</p>
-                                                <p className="text-xs text-gray-500">Qty: {item.quantity}</p>
+
+                                {/* Delivery banner */}
+                                {order.orderStatus !== 'Cancelled' && (
+                                    <div className="mx-5 mb-3 px-4 py-2 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100/60 text-xs">
+                                        {order.orderStatus === 'Delivered' ? (
+                                            <span className="flex items-center gap-2 text-emerald-600 font-semibold">
+                                                <FaCheckCircle className="w-3.5 h-3.5" /> Order delivered successfully
+                                            </span>
+                                        ) : (
+                                            <span className="flex items-center gap-2 text-blue-600 font-medium">
+                                                <MdLocalShipping className="w-4 h-4" />
+                                                Est. delivery: <strong>{dMin}</strong> – <strong>{dMax}</strong>
+                                            </span>
+                                        )}
+                                    </div>
+                                )}
+
+                                {/* Book chips */}
+                                <div className="px-5 pb-4 flex flex-wrap gap-2">
+                                    {order.items.slice(0, 3).map((item, idx) => (
+                                        <div key={idx} className="flex items-center gap-2 bg-gray-50 rounded-xl px-3 py-2 border border-gray-100 max-w-xs">
+                                            {item.book?.imageURL ? (
+                                                <img src={item.book.imageURL} alt={item.title} className="w-7 h-10 object-cover rounded-md shadow-sm" />
+                                            ) : (
+                                                <div className="w-7 h-10 bg-gray-200 rounded-md flex items-center justify-center text-gray-400 text-xs">📚</div>
+                                            )}
+                                            <div className="min-w-0">
+                                                <p className="text-xs font-bold text-gray-800 line-clamp-1">{item.title}</p>
+                                                <p className="text-[11px] text-gray-400">
+                                                    Qty {item.quantity} · <span className="text-gray-600 font-semibold">₹{(item.price * item.quantity).toFixed(2)}</span>
+                                                </p>
                                             </div>
-                                            <p className="font-semibold text-sm text-gray-800">${(item.price * item.quantity).toFixed(2)}</p>
                                         </div>
                                     ))}
-                                </div>
-                                
-                                <div className="mt-6 md:mt-0 md:w-64 bg-gray-50 p-4 rounded-lg self-start border border-gray-100">
-                                    <h4 className="font-semibold text-gray-800 mb-2">Shipping Details</h4>
-                                    {order.shippingAddress ? (
-                                        <div className="text-sm text-gray-600 space-y-1">
-                                            <p className="font-medium text-gray-800">{order.shippingAddress.name}</p>
-                                            <p>{order.shippingAddress.street}</p>
-                                            <p>{order.shippingAddress.city}, {order.shippingAddress.state} {order.shippingAddress.zip}</p>
-                                            <p>{order.shippingAddress.country}</p>
+                                    {order.items.length > 3 && (
+                                        <div className="flex items-center px-3 text-xs text-gray-400 font-semibold">
+                                            +{order.items.length - 3} more
                                         </div>
-                                    ) : (
-                                        <p className="text-sm text-gray-500">Address details unavailable.</p>
                                     )}
                                 </div>
+
+                                {/* Footer */}
+                                <div className="px-5 py-2.5 bg-gray-50 border-t border-gray-100 flex items-center gap-1.5 text-xs text-blue-500 font-bold group-hover:text-blue-700 transition-colors">
+                                    View full order details <FaChevronRight className="w-3 h-3" />
+                                </div>
                             </div>
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
-            )}
+            </div>
         </div>
     );
 };

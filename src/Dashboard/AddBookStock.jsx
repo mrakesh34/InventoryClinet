@@ -20,7 +20,10 @@ const AddBookStock = () => {
       .catch(() => { toast.error('Failed to load books.'); setLoading(false); });
   }, []);
 
-  const filtered = books.filter(b =>
+  // Admin can only manage stock for platform books (vendor = null)
+  const platformBooks = books.filter(b => !b.vendor);
+
+  const filtered = platformBooks.filter(b =>
     b.bookTitle?.toLowerCase().includes(search.toLowerCase()) ||
     b.authorName?.toLowerCase().includes(search.toLowerCase())
   );
@@ -90,7 +93,10 @@ const AddBookStock = () => {
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-800">➕ Add Book Stock</h1>
-        <p className="text-gray-500 mt-1">Select a book from the dropdown and add inventory stock.</p>
+        <p className="text-gray-500 mt-1">Select a platform book from the dropdown and add inventory stock.</p>
+        <p className="text-xs text-amber-600 bg-amber-50 border border-amber-100 rounded-lg px-3 py-1.5 mt-2 inline-flex items-center gap-1.5">
+          🔒 Vendor books are managed by their respective vendors only.
+        </p>
       </div>
 
       {/* Book Selector Dropdown */}

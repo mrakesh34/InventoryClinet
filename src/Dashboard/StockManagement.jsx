@@ -133,10 +133,12 @@ const StockManagement = () => {
     return matchSearch && matchFilter;
   });
 
-  const totalStock  = books.reduce((sum, b) => sum + (b.stock ?? 0), 0);
-  const lowCount    = books.filter(b => b.stock > 0 && b.stock <= (b.lowStockThreshold ?? LOW_STOCK_DEFAULT)).length;
-  const outCount    = books.filter(b => b.stock === 0).length;
-  const okCount     = books.filter(b => b.stock > (b.lowStockThreshold ?? LOW_STOCK_DEFAULT)).length;
+  // Only platform books count in admin stats (vendor = null)
+  const platformBooks = books.filter(b => !b.vendor);
+  const totalStock  = platformBooks.reduce((sum, b) => sum + (b.stock ?? 0), 0);
+  const lowCount    = platformBooks.filter(b => b.stock > 0 && b.stock <= (b.lowStockThreshold ?? LOW_STOCK_DEFAULT)).length;
+  const outCount    = platformBooks.filter(b => b.stock === 0).length;
+  const okCount     = platformBooks.filter(b => b.stock > (b.lowStockThreshold ?? LOW_STOCK_DEFAULT)).length;
 
   if (loading) {
     return (
@@ -257,50 +259,60 @@ const StockManagement = () => {
                         <StockBadge stock={book.stock ?? 0} threshold={threshold} />
                       </td>
 
-                      {/* Threshold input */}
+                      {/* Threshold input — locked for vendor books */}
                       <td className="px-5 py-4">
-                        <div className="flex items-center gap-1.5">
-                          <input
-                            type="number"
-                            min="1"
-                            value={fs.threshold}
-                            onChange={e => handleFormChange(book._id, 'threshold', e.target.value)}
-                            className="w-16 text-center border border-gray-200 rounded-lg py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-                          />
-                          <span className="text-xs text-gray-400">min</span>
-                        </div>
+                        {book.vendor ? (
+                          <span className="text-xs text-gray-400 italic">—</span>
+                        ) : (
+                          <div className="flex items-center gap-1.5">
+                            <input
+                              type="number"
+                              min="1"
+                              value={fs.threshold}
+                              onChange={e => handleFormChange(book._id, 'threshold', e.target.value)}
+                              className="w-16 text-center border border-gray-200 rounded-lg py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                            />
+                            <span className="text-xs text-gray-400">min</span>
+                          </div>
+                        )}
                       </td>
 
-                      {/* Add stock controls */}
+                      {/* Add stock controls — locked for vendor books */}
                       <td className="px-5 py-4">
-                        <div className="flex items-center gap-2">
-                          <input
-                            type="number"
-                            min="1"
-                            placeholder="Qty"
-                            value={fs.addQty}
-                            onChange={e => handleFormChange(book._id, 'addQty', e.target.value)}
-                            className="w-20 text-center border border-gray-200 rounded-lg py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
-                          />
-                          <button
-                            disabled={isUpdating}
-                            onClick={() => handleUpdateStock(book, 'add')}
-                            className="flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
-                          >
-                            <HiPlusCircle className="w-4 h-4" />
-                            {isUpdating ? '...' : 'Add'}
-                          </button>
-                          {book.stock > 0 && (
+                        {book.vendor ? (
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-gray-100 text-gray-400 text-xs font-semibold rounded-lg cursor-not-allowed select-none">
+                            🔒 Vendor Managed
+                          </span>
+                        ) : (
+                          <div className="flex items-center gap-2">
+                            <input
+                              type="number"
+                              min="1"
+                              placeholder="Qty"
+                              value={fs.addQty}
+                              onChange={e => handleFormChange(book._id, 'addQty', e.target.value)}
+                              className="w-20 text-center border border-gray-200 rounded-lg py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                            />
                             <button
                               disabled={isUpdating}
-                              onClick={() => handleUpdateStock(book, 'remove')}
-                              className="flex items-center gap-1 px-3 py-1.5 bg-gray-100 text-gray-700 text-xs font-semibold rounded-lg hover:bg-red-50 hover:text-red-600 disabled:opacity-50 transition-colors"
+                              onClick={() => handleUpdateStock(book, 'add')}
+                              className="flex items-center gap-1 px-3 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
                             >
-                              <HiMinusSm className="w-4 h-4" />
-                              Remove
+                              <HiPlusCircle className="w-4 h-4" />
+                              {isUpdating ? '...' : 'Add'}
                             </button>
-                          )}
-                        </div>
+                            {book.stock > 0 && (
+                              <button
+                                disabled={isUpdating}
+                                onClick={() => handleUpdateStock(book, 'remove')}
+                                className="flex items-center gap-1 px-3 py-1.5 bg-gray-100 text-gray-700 text-xs font-semibold rounded-lg hover:bg-red-50 hover:text-red-600 disabled:opacity-50 transition-colors"
+                              >
+                                <HiMinusSm className="w-4 h-4" />
+                                Remove
+                              </button>
+                            )}
+                          </div>
+                        )}
                       </td>
                     </tr>
                   );

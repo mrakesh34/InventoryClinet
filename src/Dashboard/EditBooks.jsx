@@ -3,33 +3,14 @@ import { Button, Label, Select, TextInput, Textarea, FileInput, Spinner } from '
 import { useLoaderData, useParams } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import API_BASE from '../utils/api';
+import BOOK_CATEGORIES from '../utils/bookCategories';
 
 const EditBooks = () => {
   const { id } = useParams();
-  const { bookTitle, authorName, imageURL, category, bookDescription, bookPDFURL, price } = useLoaderData();
+  const { bookTitle, authorName, imageURL, category, bookDescription, bookPDFURL, price, costPrice } = useLoaderData();
   const [isUploading, setIsUploading] = useState(false);
 
-  const bookCategories = [
-    "Fiction",
-    "Non-fiction",
-    "Mystery",
-    "Programming",
-    "Science fiction",
-    "Fantasy",
-    "Horror",
-    "Biography",
-    "Autobiography",
-    "History",
-    "Self-help",
-    "Business",
-    "Memoir",
-    "Poetry",
-    "Children's books",
-    "Travel",
-    "Religion and spirituality",
-    "Science",
-    "Art and design",
-  ];
+  const bookCategories = BOOK_CATEGORIES;
 
   const [selectedBookCategory, setSelectedBookCategory] = useState(
     bookCategories[0]
@@ -91,6 +72,7 @@ const EditBooks = () => {
             imageURL: finalImageURL,
             category: updatedCategory,
             price: Number(updatedPrice),
+            costPrice: Number(form.costPrice.value) || 0,
             bookDescription: updatedDesc,
             bookPDFURL: finalPDFURL,
         };
@@ -232,10 +214,10 @@ const EditBooks = () => {
 
 
           <div className='flex gap-8'>
-            {/* book price */}
+            {/* selling price */}
             <div className='lg:w-1/2'>
               <div className="mb-2 block">
-                <Label htmlFor="price" value="Book Price ($)" />
+                <Label htmlFor="price" value="Selling Price (₹)" />
               </div>
               <TextInput
                 id="price"
@@ -249,6 +231,25 @@ const EditBooks = () => {
                 defaultValue={price}
               />
             </div>
+
+            {/* cost price */}
+            <div className='lg:w-1/2'>
+              <div className="mb-2 block">
+                <Label htmlFor="costPrice" value="Cost Price (₹) — for profit tracking" />
+              </div>
+              <TextInput
+                id="costPrice"
+                placeholder="0.00"
+                type="number"
+                step="0.01"
+                min="0"
+                name='costPrice'
+                className='w-full'
+                defaultValue={costPrice || 0}
+              />
+              <p className="text-xs text-gray-400 mt-1">Optional. Used for inventory valuation only.</p>
+            </div>
+          </div>
 
             {/* book pdf url (optional upload) */}
             <div className='lg:w-1/2'>

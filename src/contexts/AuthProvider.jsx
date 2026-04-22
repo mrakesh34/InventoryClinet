@@ -23,13 +23,15 @@ const AuthProvider = ({ children }) => {
         setLoading(false);
     }, []);
 
-    // Signup with email, password, name, role
-    const createUser = async (email, password, name, role = 'user') => {
+    // Signup with optional vendor registration
+    const createUser = async (email, password, name, registerAsVendor = false, vendorDetails = null) => {
         setLoading(true);
+        const body = { email, password, name, registerAsVendor };
+        if (registerAsVendor && vendorDetails) body.vendorDetails = vendorDetails;
         const res = await fetch(`${API_BASE}/auth/signup`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password, name, role })
+            body: JSON.stringify(body)
         });
         const data = await res.json();
         if (!res.ok) {
@@ -76,7 +78,6 @@ const AuthProvider = ({ children }) => {
         createUser,
         login,
         logOut,
-        // keep signUpWithGmail as a stub so old references don't crash
         signUpWithGmail: () => Promise.reject(new Error('Google login not available'))
     };
 

@@ -1,30 +1,56 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Avatar, Dropdown, Navbar } from 'flowbite-react';
-import { HiBookOpen, HiCollection, HiCloudUpload, HiShoppingCart, HiUsers, HiLogout, HiChartPie, HiArchive, HiClipboardList } from 'react-icons/hi';
+import {
+  HiChartPie,
+  HiShoppingCart,
+  HiUsers,
+  HiLogout,
+  HiClipboardList,
+  HiBadgeCheck,
+  HiUserGroup,
+  HiDocumentReport,
+} from 'react-icons/hi';
 import { Link } from 'react-router-dom';
 import { useContext } from 'react';
 import { AuthContext } from '../contexts/AuthProvider';
-
-const navLinks = [
-  { to: '/admin/dashboard',           label: 'Dashboard',        icon: HiChartPie },
-  { to: '/admin/dashboard/manage',    label: 'Books Inventory',  icon: HiBookOpen },
-  { to: '/admin/dashboard/stock',     label: 'Stock Management', icon: HiArchive },
-  { to: '/admin/dashboard/add-stock', label: 'Add Book Stock',   icon: HiCollection },
-  { to: '/admin/dashboard/upload',    label: 'Add New Book',     icon: HiCloudUpload },
-  { to: '/admin/dashboard/orders',    label: 'Orders',           icon: HiShoppingCart },
-  { to: '/admin/dashboard/users',     label: 'Users & Purchases',icon: HiUsers },
-  { to: '/admin/dashboard/activity',  label: 'Stock Activity',   icon: HiClipboardList },
-];
+import API_BASE from '../utils/api';
 
 const MobileDashboard = () => {
   const { user } = useContext(AuthContext);
+  const [pendingCount, setPendingCount] = useState(0);
+
+  useEffect(() => {
+    const token = localStorage.getItem('bookstore-token');
+    const fetchCount = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/vendor/applications/count`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setPendingCount(data.count || 0);
+        }
+      } catch {}
+    };
+    fetchCount();
+  }, []);
+
+  const navLinks = [
+    { to: '/admin/dashboard',                   label: 'Dashboard',        icon: HiChartPie },
+    { to: '/admin/dashboard/vendor-approvals',  label: 'Vendor Approvals', icon: HiBadgeCheck, badge: pendingCount },
+    { to: '/admin/dashboard/vendors',           label: 'Manage Vendors',   icon: HiUserGroup },
+    { to: '/admin/dashboard/users',             label: 'Users & Purchases',icon: HiUsers },
+    { to: '/admin/dashboard/orders',            label: 'All Orders',       icon: HiShoppingCart },
+    { to: '/admin/dashboard/activity',         label: 'Stock Activity',   icon: HiClipboardList },
+    { to: '/admin/dashboard/reports',           label: 'Reports',          icon: HiDocumentReport },
+  ];
 
   return (
     <div className="px-4 border-b border-gray-100 shadow-sm">
       <Navbar fluid rounded>
         <Navbar.Brand as={Link} to="/admin/dashboard">
           <span className="self-center whitespace-nowrap text-2xl font-bold text-blue-700 flex items-center gap-2">
-            📦 Inventory
+            🛡️ Admin
           </span>
         </Navbar.Brand>
         <div className="flex gap-3 items-center">
@@ -51,10 +77,15 @@ const MobileDashboard = () => {
           <Navbar.Toggle />
         </div>
         <Navbar.Collapse>
-          {navLinks.map(({ to, label, icon: Icon }) => (
+          {navLinks.map(({ to, label, icon: Icon, badge }) => (
             <Navbar.Link key={to} as={Link} to={to} className="flex items-center gap-2 py-2">
               <Icon className="w-4 h-4 text-blue-600" />
               {label}
+              {badge > 0 && (
+                <span className="ml-1 px-1.5 py-0.5 text-[10px] font-bold bg-red-500 text-white rounded-full animate-pulse">
+                  {badge}
+                </span>
+              )}
             </Navbar.Link>
           ))}
           <Navbar.Link as={Link} to="/logout" className="text-red-500 flex items-center gap-2 py-2">

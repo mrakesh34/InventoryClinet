@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import toast from 'react-hot-toast';
-import { HiTrendingUp, HiTrendingDown, HiRefresh, HiFilter } from 'react-icons/hi';
+import { HiTrendingUp, HiTrendingDown, HiRefresh, HiFilter, HiX, HiDownload } from 'react-icons/hi';
+import { useSearchParams } from 'react-router-dom';
+import { exportToCSV } from '../utils/csvExport';
 import API_BASE from '../utils/api';
 
 const typeConfig = {
@@ -30,13 +32,19 @@ const StockActivityPage = () => {
   const [page, setPage] = useState(1);
   const LIMIT = 30;
 
-  const fetchActivity = async (p = 1, f = 'all') => {
+  // Read optional vendor filter from URL query params
+  const [searchParams, setSearchParams] = useSearchParams();
+  const vendorId = searchParams.get('vendor');
+  const vendorName = searchParams.get('name');
+
+  const fetchActivity = async (p = 1, f = 'all', vid = vendorId) => {
     setLoading(true);
     try {
       const token = localStorage.getItem('bookstore-token');
       const typeParam = f !== 'all' ? `&type=${f}` : '';
+      const vendorParam = vid ? `&vendorId=${vid}` : '';
       const res = await fetch(
-        `${API_BASE}/stock-activity?page=${p}&limit=${LIMIT}${typeParam}`,
+        `${API_BASE}/stock-activity?page=${p}&limit=${LIMIT}${typeParam}${vendorParam}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       if (!res.ok) throw new Error('Failed to fetch activity');
@@ -50,16 +58,38 @@ const StockActivityPage = () => {
     }
   };
 
-  useEffect(() => { fetchActivity(page, filter); }, [page, filter]);
+  useEffect(() => { fetchActivity(page, filter, vendorId); }, [page, filter, vendorId]);
 
   const handleFilterChange = (f) => {
     setFilter(f);
     setPage(1);
   };
 
+  const clearVendorFilter = () => {
+    setSearchParams({});
+    setPage(1);
+  };
+
   const totalPages = Math.ceil(total / LIMIT);
   const stockInCount  = activities.filter(a => a.type === 'stock_in').length;
   const stockOutCount = activities.filter(a => a.type === 'stock_out').length;
+
+  const handleExportCSV = () => {
+    exportToCSV(
+      activities,
+      'stock_activity',
+      [
+        { key: 'type',        label: 'Type' },
+        { key: 'bookTitle',   label: 'Book Title' },
+        { key: 'quantity',    label: 'Quantity' },
+        { key: 'stockBefore', label: 'Stock Before' },
+        { key: 'stockAfter',  label: 'Stock After' },
+        { key: 'performedBy', label: 'Performed By' },
+        { key: 'note',        label: 'Note' },
+        { key: 'createdAt',   label: 'Date' },
+      ]
+    );
+  };
 
   return (
     <div className="w-full px-6 py-8 max-w-6xl">
@@ -69,13 +99,41 @@ const StockActivityPage = () => {
           <h1 className="text-3xl font-bold text-gray-800">📋 Stock Activity</h1>
           <p className="text-gray-500 mt-1">Full history of stock changes — admin restocks and user purchases.</p>
         </div>
-        <button
-          onClick={() => fetchActivity(page, filter)}
-          className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl text-sm font-medium transition-colors"
-        >
-          <HiRefresh className="w-4 h-4" /> Refresh
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleExportCSV}
+            disabled={activities.length === 0}
+            className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-xl text-sm font-medium transition-colors disabled:opacity-40"
+          >
+            <HiDownload className="w-4 h-4" /> Export CSV
+          </button>
+          <button
+            onClick={() => fetchActivity(page, filter, vendorId)}
+            className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-xl text-sm font-medium transition-colors"
+          >
+            <HiRefresh className="w-4 h-4" /> Refresh
+          </button>
+        </div>
       </div>
+
+      {/* Vendor filter banner */}
+      {vendorId && vendorName && (
+        <div className="flex items-center gap-3 mb-6 px-5 py-3.5 bg-violet-50 border border-violet-200 rounded-2xl">
+          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-violet-400 to-purple-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
+            {vendorName.charAt(0).toUpperCase()}
+          </div>
+          <div className="flex-1">
+            <p className="text-sm font-semibold text-violet-800">Filtered by vendor: <span className="font-bold">{vendorName}</span></p>
+            <p className="text-xs text-violet-500">Showing stock activity for this vendor's books only</p>
+          </div>
+          <button
+            onClick={clearVendorFilter}
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-violet-300 text-violet-700 rounded-lg text-xs font-semibold hover:bg-violet-50 transition-colors"
+          >
+            <HiX className="w-3.5 h-3.5" /> Clear Filter
+          </button>
+        </div>
+      )}
 
       {/* Summary cards (from current page) */}
       <div className="grid grid-cols-3 gap-4 mb-6">

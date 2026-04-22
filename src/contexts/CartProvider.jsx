@@ -5,6 +5,8 @@ import API_BASE from '../utils/api';
 
 export const CartContext = createContext();
 
+const MAX_QTY = 5; // max copies of one book a user can order
+
 export const CartProvider = ({ children }) => {
     const { user } = useContext(AuthContext);
     const [cartItems, setCartItems] = useState([]);
@@ -45,12 +47,18 @@ export const CartProvider = ({ children }) => {
             return;
         }
 
-        // Preemptive stock check if book data includes stock
+        // Preemptive checks before API call
         if (book.stock !== undefined) {
             const existingItem = cartItems.find(item => item.book && item.book._id === book._id);
             const currentQty = existingItem ? existingItem.quantity : 0;
-            if (currentQty + 1 > book.stock) {
-                toast.error(`Cannot add more. Only ${book.stock} in stock.`);
+            const allowedMax = Math.min(MAX_QTY, book.stock);
+
+            if (currentQty >= allowedMax) {
+                if (book.stock < MAX_QTY) {
+                    toast.error(`Only ${book.stock} in stock — can't add more.`);
+                } else {
+                    toast.error(`Maximum ${MAX_QTY} copies per book allowed.`);
+                }
                 return;
             }
         }
@@ -85,11 +93,17 @@ export const CartProvider = ({ children }) => {
     };
 
     // Update quantity
-    const updateQuantity = async (bookId, newQuantity, maxStock = Infinity) => {
+    const updateQuantity = async (bookId, newQuantity, stock = Infinity) => {
         if (!user || newQuantity < 1) return;
 
-        if (newQuantity > maxStock) {
-            toast.error(`Only ${maxStock} in stock.`);
+        const allowedMax = Math.min(MAX_QTY, stock);
+
+        if (newQuantity > allowedMax) {
+            if (stock < MAX_QTY) {
+                toast.error(`Only ${stock} in stock.`);
+            } else {
+                toast.error(`Maximum ${MAX_QTY} copies per book allowed.`);
+            }
             return;
         }
         

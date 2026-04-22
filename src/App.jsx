@@ -9,15 +9,15 @@ import CartDrawer from './components/CartDrawer'
 
 function App() {
 
-  const {user} = useContext(AuthContext)
+  const { user } = useContext(AuthContext)
   return (
     <>
-      <Navbar/>
+      <Navbar />
       <CartDrawer />
       <div className='min-h-screen'>
-      <Outlet/>
+        <Outlet />
       </div>
-      <FooterMain/>
+      <FooterMain />
     </>
   )
 }

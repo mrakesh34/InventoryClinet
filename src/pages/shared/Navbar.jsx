@@ -44,13 +44,14 @@ const Navbar = () => {
 
     const baseNavItems = [
         { link: "Home", path: "/" },
-        { link: "About", path: "/about" },
         { link: "Shop", path: "/shop" },
-        { link: "Blog", path: "/blog" },
+        { link: "About", path: "/about" },
     ];
 
     const navItems = user?.role === 'admin'
         ? [...baseNavItems, { link: "Admin Dashboard", path: "/admin/dashboard" }]
+        : user?.role === 'vendor'
+        ? [...baseNavItems, { link: "Vendor Dashboard", path: "/vendor/dashboard" }]
         : baseNavItems;
 
     // Get initials for avatar
@@ -68,7 +69,7 @@ const Navbar = () => {
             <nav className={`py-4 lg:px-24 px-4 ${isSticky ? "sticky top-0 left-0 right-0 bg-blue-300 shadow-sm" : ""}`}>
                 <div className="flex justify-between items-center text-base gap-8">
                     <Link to="/" className="text-2xl font-bold text-blue-700 flex items-center gap-2">
-                        <FaBlog className="inline-block" />Books
+                        <FaBlog className="inline-block" />Book Vault
                     </Link>
 
                     <ul className="md:flex space-x-12 hidden navitems">
@@ -82,7 +83,7 @@ const Navbar = () => {
                     {/* Right side: Cart and avatar */}
                     <div className={`space-x-6 hidden lg:flex items-center transition-opacity duration-300 ${isCartOpen ? 'opacity-0 pointer-events-none' : ''}`}>
                         {/* Cart Button */}
-                        <button 
+                        <button
                             onClick={() => setIsCartOpen(true)}
                             className="relative text-black hover:text-blue-700 transition-colors p-1"
                             aria-label="Open cart"
@@ -144,7 +145,7 @@ const Navbar = () => {
 
                     {/* Mobile menu btn */}
                     <div className={`md:hidden flex items-center gap-4 transition-opacity duration-300 ${isCartOpen ? 'opacity-0 pointer-events-none' : ''}`}>
-                        <button 
+                        <button
                             onClick={() => setIsCartOpen(true)}
                             className="relative text-black p-1"
                         >
