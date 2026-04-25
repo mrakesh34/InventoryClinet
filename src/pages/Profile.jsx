@@ -11,7 +11,7 @@ import { MdLocalShipping } from "react-icons/md";
 import toast from 'react-hot-toast';
 import API_BASE from '../utils/api';
 
-// ── Customer Support Panel ────────────────────────────────────────────────────
+// customer support panel
 const CustomerSupportPanel = () => {
   const [open, setOpen] = useState(false);
   return (
@@ -69,7 +69,7 @@ const CustomerSupportPanel = () => {
   );
 };
 
-// ── Delivery estimate helper ──────────────────────────────────────────────────
+// delivery estimate helper
 const getDeliveryRange = (orderDate) => {
   const fmt = (d) => d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', weekday: 'short' });
   const base = new Date(orderDate);
@@ -78,7 +78,7 @@ const getDeliveryRange = (orderDate) => {
   return { min: fmt(min), max: fmt(max) };
 };
 
-// ── Status config ─────────────────────────────────────────────────────────────
+// status config
 const STATUS = {
   Delivered:  { color: 'bg-emerald-100 text-emerald-700 border-emerald-200', dot: 'bg-emerald-500', icon: <FaCheckCircle className="w-3 h-3" /> },
   Shipped:    { color: 'bg-blue-100 text-blue-700 border-blue-200',         dot: 'bg-blue-500',    icon: <MdLocalShipping className="w-3.5 h-3.5" /> },
@@ -87,7 +87,7 @@ const STATUS = {
   Cancelled:  { color: 'bg-red-100 text-red-600 border-red-200',            dot: 'bg-red-500',     icon: <FaBan className="w-3 h-3" /> },
 };
 
-// ── Profile page ──────────────────────────────────────────────────────────────
+// profile page
 const Profile = () => {
   const { user, loading } = useContext(AuthContext);
   const location  = useLocation();
@@ -214,7 +214,7 @@ const Profile = () => {
   );
 };
 
-// ── Profile Details Tab ───────────────────────────────────────────────────────
+// profile details tab
 const INDIAN_STATES = [
   'Andhra Pradesh','Arunachal Pradesh','Assam','Bihar','Chhattisgarh',
   'Goa','Gujarat','Haryana','Himachal Pradesh','Jharkhand','Karnataka',
@@ -253,7 +253,7 @@ const ProfileDetailsTab = ({ user, onProfileUpdated }) => {
     finally { setAddrLoading(false); }
   };
 
-  // ── Validate profile form ──
+  // validate profile form
   const validate = () => {
     const e = {};
     if (!form.name.trim())                        e.name  = 'Name is required';
@@ -283,7 +283,7 @@ const ProfileDetailsTab = ({ user, onProfileUpdated }) => {
     finally { setSaving(false); }
   };
 
-  // ── Address form ──
+  // address form
   const openAddAddr = () => {
     setEditingAddr(null);
     setAddrForm({ name: user.name || '', street: '', city: '', state: '', zip: '', phone: user.phone || '', isDefault: addresses.length === 0 });
@@ -590,7 +590,7 @@ const InfoCard = ({ Icon, label, value, accent = 'blue' }) => {
   );
 };
 
-// ── My Purchases Tab ──────────────────────────────────────────────────────────
+// my purchases tab
 const MyPurchasesTab = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -736,7 +736,7 @@ const MyPurchasesTab = () => {
   );
 };
 
-// ── Wishlist Tab ──────────────────────────────────────────────────────────────
+// wishlist tab
 const WishlistTab = () => {
   const { addToCart } = useContext(CartContext);
   const navigate = useNavigate();

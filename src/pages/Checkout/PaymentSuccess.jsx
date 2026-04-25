@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { FaCheckCircle, FaShoppingBag, FaStar, FaTruck } from 'react-icons/fa';
 import { MdLocalShipping } from 'react-icons/md';
 
-// ── Delivery Date Helper ───────────────────────────────────────────────────────
+// delivery date helper
 const getDeliveryRange = () => {
     const fmt = (d) => d.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', weekday: 'long' });
     const min = new Date(); min.setDate(min.getDate() + 5);
@@ -11,7 +11,7 @@ const getDeliveryRange = () => {
     return { min: fmt(min), max: fmt(max) };
 };
 
-// ── Animated Stars ─────────────────────────────────────────────────────────────
+// animated stars component
 const AnimatedStars = () => {
     const [visible, setVisible] = useState(false);
     useEffect(() => {
@@ -34,7 +34,7 @@ const AnimatedStars = () => {
     );
 };
 
-// ── Floating Confetti Dots ─────────────────────────────────────────────────────
+// floating confetti dots
 const Confetti = () => {
     const dots = [
         { color: 'bg-blue-400',   top: '12%', left: '8%',  delay: '0s',    size: 'w-3 h-3' },
@@ -62,7 +62,7 @@ const Confetti = () => {
     );
 };
 
-// ── Review Reminder Banner ─────────────────────────────────────────────────────
+// review reminder banner
 const ReviewReminder = () => {
     const [show, setShow] = useState(false);
     const [dismissed, setDismissed] = useState(false);
@@ -120,7 +120,7 @@ const ReviewReminder = () => {
     );
 };
 
-// ── Payment Success Page ───────────────────────────────────────────────────────
+// payment success page
 const PaymentSuccess = () => {
     const navigate = useNavigate();
     const { min, max } = getDeliveryRange();

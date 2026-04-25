@@ -64,7 +64,7 @@ const router = createBrowserRouter([
     ]
   },
 
-  // ─── Admin Dashboard ─────────────────────────────────────────────────────────
+  // admin dashboard routes
   {
     path: "/admin/dashboard",
     element: <AdminRoute><DashboardLayout /></AdminRoute>,
@@ -81,7 +81,7 @@ const router = createBrowserRouter([
     ],
   },
 
-  // ─── Vendor Dashboard ────────────────────────────────────────────────────────
+  // vendor dashboard routes
   {
     path: "/vendor/dashboard",
     element: <VendorRoute><VendorLayout /></VendorRoute>,

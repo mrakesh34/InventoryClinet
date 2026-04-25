@@ -8,7 +8,7 @@ import {
 import { MdLocalShipping } from 'react-icons/md';
 import API_BASE from '../../utils/api';
 
-// ── Delivery estimate from order date ─────────────────────────────────────────
+// delivery estimate from order date
 const getDeliveryRange = (orderDate) => {
     const fmt = (d) => d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', weekday: 'short' });
     const base = new Date(orderDate);
@@ -17,7 +17,7 @@ const getDeliveryRange = (orderDate) => {
     return { min: fmt(min), max: fmt(max) };
 };
 
-// ── Status config ──────────────────────────────────────────────────────────────
+// status config
 const STATUS = {
     Delivered:  { color: 'bg-emerald-100 text-emerald-700 border-emerald-200', bar: 'bg-emerald-500', icon: <FaCheckCircle className="w-3 h-3" /> },
     Shipped:    { color: 'bg-blue-100 text-blue-700 border-blue-200',          bar: 'bg-blue-500',    icon: <MdLocalShipping className="w-3.5 h-3.5" /> },

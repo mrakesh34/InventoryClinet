@@ -46,7 +46,7 @@ const Signup = () => {
         return errors;
     };
 
-    // ── Send OTP ──
+    // send OTP
     const handleSendOtp = async (email) => {
         const emailErr = validateEmail(email);
         if (emailErr) {
@@ -78,7 +78,7 @@ const Signup = () => {
         }
     };
 
-    // ── Verify OTP ──
+    // verify OTP
     const handleVerifyOtp = async (email) => {
         if (!otpValue || otpValue.length !== 6) {
             toast.error('Please enter the 6-digit OTP');
@@ -104,7 +104,7 @@ const Signup = () => {
         }
     };
 
-    // ── Create Account ──
+    // create account
     const handleSignup = async (event) => {
         event.preventDefault();
         setErrorMessage(''); setFieldErrors({});

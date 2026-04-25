@@ -10,7 +10,7 @@ import { FaStar } from 'react-icons/fa';
 import toast from 'react-hot-toast';
 import API_BASE from '../../utils/api';
 
-// ── Delivery range ─────────────────────────────────────────────────────────────
+// delivery range
 const getDeliveryRange = (orderDate) => {
     const fmt = (d) => d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', weekday: 'short' });
     const base = new Date(orderDate);
@@ -19,7 +19,7 @@ const getDeliveryRange = (orderDate) => {
     return { min: fmt(min), max: fmt(max) };
 };
 
-// ── Status config ─────────────────────────────────────────────────────────────
+// status config
 const STATUS = {
     Delivered:  { bar: 'from-emerald-500 to-green-400',  pill: 'bg-emerald-100 text-emerald-700 border-emerald-200', icon: <FaCheckCircle /> },
     Shipped:    { bar: 'from-blue-500 to-cyan-400',      pill: 'bg-blue-100 text-blue-700 border-blue-200',           icon: <MdLocalShipping /> },
@@ -28,7 +28,7 @@ const STATUS = {
     Cancelled:  { bar: 'from-red-500 to-rose-400',       pill: 'bg-red-100 text-red-600 border-red-200',              icon: <FaBan /> },
 };
 
-// ── Rating Section ─────────────────────────────────────────────────────────────
+// rating section
 const RatingSection = ({ items }) => {
     const [ratings, setRatings]     = useState({});   // bookId -> selected star
     const [hover, setHover]         = useState({});   // bookId -> hovered star
@@ -159,7 +159,7 @@ const RatingSection = ({ items }) => {
     );
 };
 
-// ── Cancel Confirmation Modal ──────────────────────────────────────────────────
+// cancel confirmation modal
 const CancelModal = ({ onConfirm, onClose, cancelling }) => (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
         <div className="bg-white rounded-3xl shadow-2xl max-w-sm w-full p-8">
@@ -193,7 +193,7 @@ const CancelModal = ({ onConfirm, onClose, cancelling }) => (
     </div>
 );
 
-// ── Customer Support Panel ─────────────────────────────────────────────────────
+// customer support panel
 const CustomerSupportPanel = ({ orderId }) => {
     const [open, setOpen] = useState(false);
     const subject = encodeURIComponent(`Support needed for Order #${orderId?.slice(-8).toUpperCase()}`);
@@ -254,7 +254,7 @@ const CustomerSupportPanel = ({ orderId }) => {
     );
 };
 
-// ── Order Details Page ─────────────────────────────────────────────────────────
+// order details page
 const OrderDetails = () => {
     const { id }     = useParams();
     const navigate   = useNavigate();
@@ -296,7 +296,7 @@ const OrderDetails = () => {
         finally { setCancelling(false); }
     };
 
-    // ── Loading ────────────────────────────────────────────────────────────────
+    // loading state
     if (loading) return (
         <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-slate-100 via-blue-50/40 to-indigo-50 gap-3">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600" />
@@ -304,7 +304,7 @@ const OrderDetails = () => {
         </div>
     );
 
-    // ── Error ──────────────────────────────────────────────────────────────────
+    // error state
     if (error || !order) return (
         <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-100 to-indigo-50 p-4">
             <div className="bg-white p-10 rounded-3xl shadow-xl text-center max-w-sm w-full">

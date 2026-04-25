@@ -10,7 +10,7 @@ import { MdLocalShipping } from 'react-icons/md';
 
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
 
-// ── Delivery Estimate ─────────────────────────────────────────────────────────
+// delivery estimate
 const getDeliveryRange = () => {
   const fmt = (d) => d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', weekday: 'short' });
   const min = new Date(); min.setDate(min.getDate() + 5);
@@ -30,7 +30,7 @@ const DeliveryEstimate = () => {
 };
 
 
-// ── Indian States & UTs ────────────────────────────────────────────────────────
+// indian states & UTs
 const INDIAN_STATES = [
   'Andhra Pradesh', 'Arunachal Pradesh', 'Assam', 'Bihar', 'Chhattisgarh',
   'Goa', 'Gujarat', 'Haryana', 'Himachal Pradesh', 'Jharkhand', 'Karnataka',
@@ -43,7 +43,7 @@ const INDIAN_STATES = [
   'Ladakh', 'Lakshadweep', 'Puducherry',
 ];
 
-// ── Validation Rules ───────────────────────────────────────────────────────────
+// validation rules
 const EMPTY_ADDRESS = {
   name: '', phone: '', street: '', city: '', state: '', zip: '', country: 'India',
 };
@@ -98,7 +98,7 @@ const validate = (fields) => {
   return errs;
 };
 
-// ── Input Field Helper ─────────────────────────────────────────────────────────
+// input field helper
 const Field = ({ label, error, required, children }) => (
   <div className="flex flex-col gap-1">
     <label className="text-sm font-semibold text-gray-700">
@@ -116,7 +116,7 @@ const inputCls = (err) =>
       : 'border-gray-300 focus:ring-blue-400 bg-white'
   }`;
 
-// ── Address form ───────────────────────────────────────────────────────────────
+// address form component
 const AddressForm = ({ onSaved, onCancel, showCancel }) => {
   const [fields, setFields] = useState(EMPTY_ADDRESS);
   const [errors, setErrors] = useState({});
@@ -286,7 +286,7 @@ const AddressForm = ({ onSaved, onCancel, showCancel }) => {
   );
 };
 
-// ── Checkout Form (main) ───────────────────────────────────────────────────────
+// checkout form (main)
 const CheckoutForm = ({ clientSecret, addresses, refreshAddresses }) => {
   const stripe = useStripe();
   const elements = useElements();
@@ -501,7 +501,7 @@ const CheckoutForm = ({ clientSecret, addresses, refreshAddresses }) => {
   );
 };
 
-// ── Checkout Page ──────────────────────────────────────────────────────────────
+// checkout page
 const Checkout = () => {
   const [clientSecret, setClientSecret] = useState('');
   const [addresses, setAddresses] = useState([]);

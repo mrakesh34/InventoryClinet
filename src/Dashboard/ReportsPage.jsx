@@ -368,7 +368,7 @@ const ReportsPage = () => {
   );
 };
 
-// ── Summary Card Component ──
+// summary card component
 const SummaryCard = ({ icon: Icon, label, value, sub, color }) => {
   const colorMap = {
     blue:    { bg: 'bg-blue-50 border-blue-100',    icon: 'bg-blue-500' },

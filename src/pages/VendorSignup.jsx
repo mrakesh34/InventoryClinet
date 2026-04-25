@@ -59,7 +59,7 @@ export default function VendorSignup() {
         return () => clearTimeout(timer);
     }, [cooldown]);
 
-    // ── OTP Handlers ─────────────────────────────────────────────────────────────
+    // OTP handlers
     const handleSendOtp = async () => {
         if (!email.trim() || !/\S+@\S+\.\S+/.test(email)) {
             setErrors(prev => ({ ...prev, email: 'Enter a valid email first' }));
@@ -101,7 +101,7 @@ export default function VendorSignup() {
         finally { setOtpLoading(false); }
     };
 
-    // ── Validation ──────────────────────────────────────────────────────────────
+    // form validation
     const validateStep1 = () => {
         const e = {};
         if (!name.trim()) e.name = 'Full name is required';
@@ -157,7 +157,7 @@ export default function VendorSignup() {
         } finally { setLoading(false); }
     };
 
-    // ── Progress indicator ──────────────────────────────────────────────────────
+    // progress indicator
     const Progress = () => (
         <div style={{ marginBottom:'2rem' }}>
             <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:0, marginBottom:'0.75rem' }}>
