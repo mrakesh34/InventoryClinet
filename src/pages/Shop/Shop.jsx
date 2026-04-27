@@ -4,24 +4,40 @@ import { Card, Spinner } from 'flowbite-react';
 import { AuthContext } from '../../contexts/AuthProvider';
 import { CartContext } from '../../contexts/CartProvider';
 import API_BASE from '../../utils/api';
+import BOOK_CATEGORIES from '../../utils/bookCategories';
 
 const BOOKS_PER_PAGE = 12;
 
+const CATEGORY_ICONS = {
+  "Art and design": "🎨",
+  "Autobiography": "📖",
+  "Biography": "👤",
+  "Business": "💼",
+  "Children's books": "🧸",
+  "Fantasy": "🧚",
+  "Fiction": "📚",
+  "History": "🏛️",
+  "Horror": "👻",
+  "Memoir": "✍️",
+  "Mystery": "🕵️",
+  "Non-fiction": "📘",
+  "Poetry": "✒️",
+  "Programming": "💻",
+  "Religion and spirituality": "🕊️",
+  "Science": "🔬",
+  "Science fiction": "🚀",
+  "Self-help": "🌱",
+  "Travel": "✈️",
+  "Other": "📌"
+};
+
 const FILTER_CATEGORIES = [
   { id: 'all', label: '🌐 All' },
-  { id: 'python', label: '🐍 Python', match: (t) => t.includes('python') },
-  { id: 'javascript', label: '🟨 JavaScript', match: (t) => t.includes('javascript') || t.includes('typescript') },
-  { id: 'java', label: '☕ Java', match: (t) => t.includes('java') },
-  { id: 'cpp', label: '⚙️ C / C++', match: (t) => t.includes('cpp') || t.includes('c') },
-  { id: 'ai-ml', label: '🤖 AI & ML', match: (t) => t.includes('ai-ml') },
-  { id: 'web-dev', label: '🌍 Web Dev', match: (t) => t.includes('web-dev') },
-  { id: 'devops', label: '🐳 DevOps', match: (t) => t.includes('devops') },
-  { id: 'algorithms', label: '📊 Algorithms', match: (t) => t.includes('algorithms') },
-  { id: 'rust-go', label: '🦀 Rust / Go', match: (t) => t.includes('rust') || t.includes('go') },
+  ...BOOK_CATEGORIES.map(cat => ({ id: cat, label: `${CATEGORY_ICONS[cat] || '📌'} ${cat}` }))
 ];
 
 export default function Shop() {
-  const { loading, currentUser } = useContext(AuthContext);
+  const { loading, user } = useContext(AuthContext);
   const { addToCart } = useContext(CartContext);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -47,8 +63,7 @@ export default function Shop() {
 
   const filteredBooks = books
     .filter(book => {
-      const tags = book.tags || [];
-      const matchesFilter = activeFilter === 'all' || activeFilterDef?.match?.(tags);
+      const matchesFilter = activeFilter === 'all' || book.category === activeFilter;
       const matchesSearch = book.bookTitle.toLowerCase().includes(searchQuery.toLowerCase());
       return matchesFilter && matchesSearch;
     })
@@ -77,7 +92,7 @@ export default function Shop() {
   const handleFilter = (id) => { setActiveFilter(id); resetPage(); setFilterOpen(false); };
 
   const handleCartClick = (book) => {
-    if (!currentUser) {
+    if (!user) {
       navigate('/login', { state: { from: { pathname: '/shop' } } });
       return;
     }
@@ -99,7 +114,7 @@ export default function Shop() {
     <div className='my-28 px-4 lg:px-24'>
       <h2 className='text-3xl font-bold text-center mb-8 text-blue-700'>All Books are Available Here</h2>
 
-      {/* ── Search + Filter bar ────────────────────────────── */}
+      {/*  Search + Filter bar*/}
       <div className='flex items-center justify-center gap-3 mb-4 flex-wrap'>
         {/* Search input */}
         <div className='relative w-full max-w-lg'>
@@ -125,7 +140,7 @@ export default function Shop() {
           )}
         </div>
 
-        {/* ── Filter dropdown button ─────────────────────── */}
+        {/* ── Filter dropdown button*/}
         <div className='relative flex-shrink-0' ref={filterRef}>
           <button
             id="shop-filter-btn"
@@ -145,12 +160,12 @@ export default function Shop() {
           </button>
 
           {filterOpen && (
-            <div className='absolute right-0 top-[calc(100%+8px)] z-50 bg-white border border-gray-200 rounded-2xl shadow-2xl min-w-52 py-2 overflow-hidden animate-fade-scale'>
+            <div className='absolute left-0 top-[calc(100%+8px)] z-50 bg-white border border-gray-200 rounded-2xl shadow-2xl min-w-64 py-2 overflow-y-auto max-h-[60vh] animate-fade-scale'>
               {FILTER_CATEGORIES.map(cat => (
                 <button
                   key={cat.id}
                   onClick={() => handleFilter(cat.id)}
-                  className={`w-full text-left px-4 py-2.5 text-sm font-medium transition-colors duration-150 flex items-center gap-2 ${activeFilter === cat.id
+                  className={`w-full text-left px-4 py-2.5 text-sm font-medium whitespace-nowrap transition-colors duration-150 flex items-center gap-2 ${activeFilter === cat.id
                     ? 'bg-blue-50 text-blue-600'
                     : 'text-gray-700 hover:bg-gray-50'
                     }`}
@@ -174,7 +189,7 @@ export default function Shop() {
         }
       </p>
 
-      {/* ── Books Grid ──────────────────────────────────── */}
+      {/* ── Books Grid*/}
       {pagedBooks.length > 0 ? (
         <>
           <div className='grid lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-8'>
@@ -241,7 +256,7 @@ export default function Shop() {
             })}
           </div>
 
-          {/* ── Pagination ───────────────────────────────── */}
+          {/* ── Pagination*/}
           {totalPages > 1 && (
             <div className='flex items-center justify-center gap-2 mt-14 flex-wrap'>
               <button

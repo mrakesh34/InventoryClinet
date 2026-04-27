@@ -4,12 +4,7 @@ import { AuthContext } from '../contexts/AuthProvider';
 import toast from 'react-hot-toast';
 import API_BASE from '../utils/api';
 
-const BOOK_CATEGORIES = [
-    'Art and design', 'Autobiography', 'Biography', "Children's books", 'Business',
-    'Fantasy', 'Fiction', 'History', 'Horror', 'Memoir', 'Mystery',
-    'Non-fiction', 'Poetry', 'Programming', 'Religion and spirituality',
-    'Science', 'Science fiction', 'Self-help', 'Travel', 'Other',
-];
+import BOOK_CATEGORIES from '../utils/bookCategories';
 
 const STEP_TITLES = [
     'Account Details',
